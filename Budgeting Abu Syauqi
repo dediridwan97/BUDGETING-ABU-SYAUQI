@@ -1,0 +1,2567 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Abu Syauqi Budgeting - Aplikasi Keuangan Keluarga</title>
+
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- FontAwesome 6 CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <style>
+    /* Reset agar terisolasi penuh dari CSS bawaan template Blogger */
+    html, body {
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: hidden !important;
+      width: 100% !important;
+      height: 100% !important;
+      font-family: 'Plus Jakarta Sans', sans-serif !important;
+      background-color: #e2e8f0 !important;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Kontainer Full-Page Menutupi Seluruh Template Blogger */
+    #abu-syauqi-app {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 999999;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: radial-gradient(circle at top left, #ecfdf5 0%, #e2e8f0 48%, #f1f5f9 100%);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #0f172a;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    #abu-syauqi-app *, #abu-syauqi-app *::before, #abu-syauqi-app *::after {
+      box-sizing: border-box;
+    }
+
+    /* Bingkai Aplikasi HP (Mobile-Only Shell max 440px) */
+    #mobile-shell {
+      position: relative;
+      width: 100%;
+      max-width: 440px;
+      height: 100%;
+      margin: 0 auto;
+      background-color: #f8fafc;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.22);
+    }
+
+    /* Scrollbar tipis & halus */
+    .app-scroll::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .app-scroll::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .app-scroll::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+
+    /* Animasi Bottom Sheet */
+    @keyframes slideUpSheet {
+      from { transform: translateY(100%); opacity: 0.6; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    .animate-sheet {
+      animation: slideUpSheet 0.24s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    .animate-fade {
+      animation: fadeIn 0.2s ease-out forwards;
+    }
+
+    /* Mode Cetak / Simpan PDF */
+    @media print {
+      #abu-syauqi-app {
+        position: static !important;
+        height: auto !important;
+        width: 100% !important;
+        background: #ffffff !important;
+        display: block !important;
+      }
+      #mobile-shell {
+        max-width: 100% !important;
+        height: auto !important;
+        box-shadow: none !important;
+        overflow: visible !important;
+      }
+      #app-top-bar, #app-bottom-nav, .no-print {
+        display: none !important;
+      }
+      #app-main-scroll {
+        overflow: visible !important;
+        height: auto !important;
+        padding-bottom: 0 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Thumbnail Postingan Blogger Tersembunyi -->
+  <div style="display:none;"><img src="https://placehold.co/1200x630/0f766e/ffffff?text=Abu+Syauqi+Budgeting" alt="Abu Syauqi Budgeting" /></div>
+
+  <!-- ===================================================================== -->
+  <!-- KONTAINER FULL-PAGE BLOGGER -> MOBILE-ONLY SHELL (MAX 440PX)          -->
+  <!-- ===================================================================== -->
+  <div id="abu-syauqi-app">
+    <div id="mobile-shell">
+
+      <!-- ==================== TOP APP BAR ==================== -->
+      <header id="app-top-bar" class="bg-white border-b border-slate-200/80 px-4 pt-3 pb-2.5 shrink-0 z-20 shadow-[0_2px_10px_rgba(15,23,42,0.03)]">
+        <div class="flex items-center justify-between gap-2 mb-2.5">
+          <!-- Brand & Mode -->
+          <div class="flex items-center gap-2.5 min-w-0">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-teal-700 to-emerald-500 text-white flex items-center justify-center shadow-sm shrink-0">
+              <i class="fa-solid fa-wallet text-sm"></i>
+            </div>
+            <div class="min-w-0">
+              <h1 class="text-[15px] font-extrabold text-slate-900 leading-tight truncate">Abu Syauqi Budgeting</h1>
+              <div id="mode-indicator" class="flex items-center gap-1.5 text-[10px] font-bold">
+                <!-- Status mode diisi JS -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Tombol Refresh -->
+          <button onclick="refreshAllData()" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-600 flex items-center justify-center transition shrink-0" aria-label="Segarkan Data">
+            <i class="fa-solid fa-rotate text-sm"></i>
+          </button>
+        </div>
+
+        <!-- Quick Period Picker (Bulan & Tahun) -->
+        <div class="flex items-center gap-2">
+          <div class="flex-1 flex items-center gap-1.5 bg-slate-100/90 p-1 rounded-xl border border-slate-200/70">
+            <button onclick="shiftPeriod(-1)" class="w-8 h-8 rounded-lg bg-white text-slate-600 hover:text-teal-700 flex items-center justify-center shadow-2xs active:scale-95 transition shrink-0" aria-label="Bulan Sebelumnya">
+              <i class="fa-solid fa-chevron-left text-xs"></i>
+            </button>
+            <select id="global-month-select" onchange="onGlobalPeriodChange()" class="flex-1 bg-transparent text-xs font-bold text-slate-800 text-center focus:outline-none py-1 cursor-pointer">
+              <!-- Diisi JS -->
+            </select>
+            <select id="global-year-select" onchange="onGlobalPeriodChange()" class="w-[68px] bg-transparent text-xs font-bold text-teal-800 text-center focus:outline-none py-1 cursor-pointer border-l border-slate-300/70">
+              <!-- Diisi JS -->
+            </select>
+            <button onclick="shiftPeriod(1)" class="w-8 h-8 rounded-lg bg-white text-slate-600 hover:text-teal-700 flex items-center justify-center shadow-2xs active:scale-95 transition shrink-0" aria-label="Bulan Berikutnya">
+              <i class="fa-solid fa-chevron-right text-xs"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- ==================== AREA KONTEN SCROLLABLE ==================== -->
+      <main id="app-main-scroll" class="flex-1 overflow-y-auto app-scroll px-3.5 pt-3.5 pb-24">
+        <div id="page-container">
+          <!-- Dirender dinamis oleh JavaScript -->
+        </div>
+      </main>
+
+      <!-- ==================== FIXED BOTTOM NAVIGATION (5 TOMBOL) ==================== -->
+      <nav id="app-bottom-nav" class="absolute bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200 px-2 pt-1.5 pb-2 flex items-end justify-around z-30 shadow-[0_-6px_20px_rgba(15,23,42,0.06)]">
+        <!-- Dirender oleh JavaScript -->
+      </nav>
+
+      <!-- ==================== MOBILE BOTTOM SHEET (FORM DINAMIS) ==================== -->
+      <div id="sheet-backdrop" class="hidden absolute inset-0 bg-slate-900/50 backdrop-blur-[1.5px] z-40 flex flex-col justify-end animate-fade" onclick="closeSheet()">
+        <div id="sheet-panel" class="bg-white rounded-t-3xl w-full max-h-[88%] flex flex-col overflow-hidden shadow-2xl animate-sheet" onclick="event.stopPropagation()">
+          <!-- Handle Bar -->
+          <div class="pt-2.5 pb-1 flex justify-center shrink-0" onclick="closeSheet()">
+            <div class="w-11 h-1.5 rounded-full bg-slate-300"></div>
+          </div>
+          <!-- Sheet Header -->
+          <div class="px-5 py-2.5 border-b border-slate-100 flex items-center justify-between shrink-0">
+            <h3 id="sheet-title" class="text-[15px] font-extrabold text-slate-900">Judul</h3>
+            <button onclick="closeSheet()" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition">
+              <i class="fa-solid fa-xmark text-sm"></i>
+            </button>
+          </div>
+          <!-- Sheet Content -->
+          <div id="sheet-body" class="p-5 overflow-y-auto app-scroll">
+            <!-- Form dinamis -->
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== CONFIRMATION SHEET (PENGGANTI confirm()) ==================== -->
+      <div id="confirm-backdrop" class="hidden absolute inset-0 bg-slate-900/50 backdrop-blur-[1.5px] z-50 flex flex-col justify-end animate-fade">
+        <div class="bg-white rounded-t-3xl w-full p-6 shadow-2xl animate-sheet text-center">
+          <div class="w-12 h-12 rounded-2xl bg-rose-100 text-rose-600 mx-auto mb-3 flex items-center justify-center text-xl">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <h3 id="confirm-title" class="text-base font-extrabold text-slate-900 mb-1">Konfirmasi</h3>
+          <p id="confirm-message" class="text-xs text-slate-600 leading-relaxed mb-5">Apakah Anda yakin ingin melanjutkan?</p>
+          <div class="grid grid-cols-2 gap-3">
+            <button id="confirm-cancel-btn" class="min-h-[44px] rounded-xl border border-slate-200 text-slate-700 font-bold text-xs hover:bg-slate-50 active:scale-95 transition">Batal</button>
+            <button id="confirm-ok-btn" class="min-h-[44px] rounded-xl bg-rose-600 text-white font-bold text-xs hover:bg-rose-700 active:scale-95 transition">Ya, Lanjutkan</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== LOADING OVERLAY ==================== -->
+      <div id="global-loader" class="hidden absolute inset-0 bg-slate-900/30 backdrop-blur-[1px] z-[60] flex items-center justify-center p-6">
+        <div class="bg-white rounded-2xl px-5 py-4 shadow-xl flex items-center gap-3.5 border border-slate-100">
+          <div class="w-6 h-6 border-[3px] border-teal-700 border-t-transparent rounded-full animate-spin shrink-0"></div>
+          <div>
+            <p class="text-xs font-extrabold text-slate-800">Menyinkronkan...</p>
+            <p class="text-[11px] text-slate-500">Menghubungi Google Sheets</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== TOAST CONTAINER ==================== -->
+      <div id="toast-container" class="absolute top-3 left-3 right-3 z-[70] flex flex-col gap-2 pointer-events-none"></div>
+
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- JAVASCRIPT UTAMA ABU SYAUQI BUDGETING (MOBILE-ONLY APP)               -->
+  <!-- ===================================================================== -->
+  <script>
+    // KONFIGURASI APLIKASI
+    // UBAH IS_PREVIEW KE false JIKA AKAN DI-DEPLOY KE BLOGGER
+    const IS_PREVIEW = false; // Set default true untuk Canvas
+    const GAS_URL = "https://script.google.com/macros/s/AKfycbxRkLzq1HZOlBwmRgzXvMh77BB1FeOREVL1YRvVb1vg-Sepdkqp83otI2tuIptry8Ca/exec";
+
+    // =========================================================================
+    // 1. KONSTANTA, STATE & CHART REGISTRY
+    // =========================================================================
+    const STORAGE_KEY = "abu_syauqi_mobile_budget_v3";
+    const BULAN_LIST = [
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
+
+    const nowDate = new Date();
+    const state = {
+      activePage: "dashboard", // dashboard | transaksi | anggaran | lainnya | dompet | tabungan | tagihan | laporan | pengaturan
+      selectedMonth: nowDate.getMonth(),
+      selectedYear: nowDate.getFullYear(),
+      dashExTab: "top21",         // top21 | alokasi | compare
+      dashInTab: "top10",         // top10 | kategori | compare
+      dashBudgetTab: "Kebutuhan", // Kebutuhan | Keinginan | Investasi
+      txSearch: "",
+      txJenis: "ALL",
+      txDompet: "ALL",
+      txKategori: "ALL",
+      katTab: "Pengeluaran",      // Pengeluaran | Pemasukan
+      katSearch: "",
+      katCollapsed: {},
+      reportMode: "bulanan",
+      data: {
+        dompet: [],
+        kategori: [],
+        transaksi: [],
+        targetBulanan: [],
+        targetTabungan: [],
+        tagihan: []
+      }
+    };
+
+    const chartInstances = {};
+    function destroyChart(key) {
+      if (chartInstances[key]) {
+        chartInstances[key].destroy();
+        delete chartInstances[key];
+      }
+    }
+    function destroyAllCharts() {
+      Object.keys(chartInstances).forEach(destroyChart);
+    }
+
+    // =========================================================================
+    // 2. FUNGSI HELPER FORMAT, UTILITAS & UI (TOAST, LOADER, BOTTOM SHEET)
+    // =========================================================================
+    function formatRp(num) {
+      const n = Number(num) || 0;
+      const absStr = Math.round(Math.abs(n)).toLocaleString("id-ID");
+      return (n < 0 ? "-Rp " : "Rp ") + absStr;
+    }
+
+    function formatShortRp(num) {
+      const n = Number(num) || 0;
+      const sign = n < 0 ? "-" : "";
+      const abs = Math.abs(n);
+      if (abs >= 1000000000) return sign + (abs / 1000000000).toFixed(1) + "M";
+      if (abs >= 1000000) return sign + (abs / 1000000).toFixed(1) + "jt";
+      if (abs >= 1000) return sign + Math.round(abs / 1000) + "rb";
+      return sign + Math.round(abs);
+    }
+
+    // Format angka dengan pemisah ribuan tanda koma (contoh: 1,500,000)
+    function formatNumberComma(val) {
+      if (val === "" || val === null || val === undefined) return "";
+      const digits = String(val).replace(/[^\d]/g, "");
+      if (!digits) return "";
+      return Number(digits).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    // Ambil nilai angka murni dari input yang berisi tanda koma
+    function parseNominal(val) {
+      const digits = String(val == null ? "" : val).replace(/[^\d]/g, "");
+      return digits ? Number(digits) : 0;
+    }
+
+    // Handler oninput untuk memformat koma otomatis sambil menjaga posisi kursor
+    function formatNominalInput(el) {
+      const start = el.selectionStart || 0;
+      const oldLen = el.value.length;
+      const formatted = formatNumberComma(el.value);
+      el.value = formatted;
+      const newLen = formatted.length;
+      const nextPos = Math.max(0, start + (newLen - oldLen));
+      try { el.setSelectionRange(nextPos, nextPos); } catch (e) {}
+    }
+
+    function escapeHtml(str) {
+      return String(str == null ? "" : str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function pad2(n) {
+      return String(n).padStart(2, "0");
+    }
+
+    function getBulanTahunKey(year, monthIdx) {
+      return year + "-" + pad2(monthIdx + 1);
+    }
+
+    function getPrevMonthYear(year, monthIdx) {
+      if (monthIdx === 0) return { year: year - 1, month: 11 };
+      return { year: year, month: monthIdx - 1 };
+    }
+
+    function formatDateIndo(iso) {
+      if (!iso) return "-";
+      const p = String(iso).split("-");
+      if (p.length !== 3) return iso;
+      const m = Number(p[1]) - 1;
+      return Number(p[2]) + " " + (BULAN_LIST[m] ? BULAN_LIST[m].slice(0, 3) : p[1]) + " " + p[0];
+    }
+
+    function genId(prefix) {
+      return prefix + "-" + Date.now().toString(36) + "-" + Math.random().toString(36).slice(2, 6).toUpperCase();
+    }
+
+    function getPosBadgeClass(pos) {
+      if (pos === "Kebutuhan") return "bg-rose-100 text-rose-700 border-rose-200";
+      if (pos === "Keinginan") return "bg-amber-100 text-amber-800 border-amber-200";
+      if (pos === "Investasi") return "bg-teal-100 text-teal-800 border-teal-200";
+      return "bg-slate-100 text-slate-600 border-slate-200";
+    }
+
+    function showLoader(show) {
+      const el = document.getElementById("global-loader");
+      if (!el) return;
+      el.classList.toggle("hidden", !show);
+    }
+
+    function showToast(message, type) {
+      const container = document.getElementById("toast-container");
+      if (!container) return;
+      const t = type || "success";
+      const colors = {
+        success: "bg-emerald-700 text-white",
+        error: "bg-rose-600 text-white",
+        warning: "bg-amber-500 text-white",
+        info: "bg-slate-800 text-white"
+      };
+      const icons = {
+        success: "fa-circle-check",
+        error: "fa-circle-xmark",
+        warning: "fa-triangle-exclamation",
+        info: "fa-circle-info"
+      };
+      const el = document.createElement("div");
+      el.className = "pointer-events-auto flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl shadow-lg text-xs font-bold animate-fade " + (colors[t] || colors.info);
+      el.innerHTML = '<i class="fa-solid ' + (icons[t] || icons.info) + ' text-sm shrink-0"></i><span class="leading-snug">' + escapeHtml(message) + '</span>';
+      container.appendChild(el);
+      setTimeout(function() {
+        el.style.opacity = "0";
+        el.style.transition = "opacity 0.25s ease";
+        setTimeout(function() { el.remove(); }, 250);
+      }, 2800);
+    }
+
+    function openSheet(title, htmlContent) {
+      document.getElementById("sheet-title").textContent = title;
+      document.getElementById("sheet-body").innerHTML = htmlContent;
+      document.getElementById("sheet-backdrop").classList.remove("hidden");
+    }
+
+    function closeSheet() {
+      document.getElementById("sheet-backdrop").classList.add("hidden");
+      document.getElementById("sheet-body").innerHTML = "";
+    }
+
+    function showConfirm(title, message, onConfirm) {
+      const backdrop = document.getElementById("confirm-backdrop");
+      document.getElementById("confirm-title").textContent = title;
+      document.getElementById("confirm-message").textContent = message;
+      backdrop.classList.remove("hidden");
+      const okBtn = document.getElementById("confirm-ok-btn");
+      const cancelBtn = document.getElementById("confirm-cancel-btn");
+      const cleanup = function() {
+        backdrop.classList.add("hidden");
+        okBtn.onclick = null;
+        cancelBtn.onclick = null;
+      };
+      cancelBtn.onclick = cleanup;
+      okBtn.onclick = function() {
+        cleanup();
+        if (typeof onConfirm === "function") onConfirm();
+      };
+    }
+
+    // =========================================================================
+    // 3. MASTER 79 KATEGORI & DATA DUMMY PREVIEW (6 BULAN LENGKAP)
+    // =========================================================================
+    function getDefaultMasterKategori() {
+      const pengeluaranRaw = [
+        // Kebutuhan Rumah Tangga (12)
+        ["Kebutuhan Rumah Tangga", "Belanja bulanan", "Kebutuhan"],
+        ["Kebutuhan Rumah Tangga", "Listrik", "Kebutuhan"],
+        ["Kebutuhan Rumah Tangga", "Air", "Kebutuhan"],
+        ["Kebutuhan Rumah Tangga", "Gas (LPG)", "Kebutuhan"],
+        ["Kebutuhan Rumah Tangga", "Internet", "Kebutuhan"],
+        ["Kebutuhan Rumah Tangga", "Paket Data", "Kebutuhan"],
+        ["Kebutuhan Rumah Tangga", "TV Kabel / Streaming", "Kebutuhan"],
+        ["Kebutuhan Rumah Tangga", "Sewa / Cicilan rumah", "Kebutuhan"],
+        ["Kebutuhan Rumah Tangga", "Laundry", "Kebutuhan"],
+        ["Kebutuhan Rumah Tangga", "Perawatan rumah", "Kebutuhan"],
+        ["Kebutuhan Rumah Tangga", "Pajak PBB", "Kebutuhan"],
+        ["Kebutuhan Rumah Tangga", "Iuran kebersihan", "Kebutuhan"],
+        // Transportasi (7)
+        ["Transportasi", "Bensin/BBM", "Kebutuhan"],
+        ["Transportasi", "Parkir", "Kebutuhan"],
+        ["Transportasi", "Tol", "Kebutuhan"],
+        ["Transportasi", "Servis kendaraan", "Kebutuhan"],
+        ["Transportasi", "Angkutan umum (ojek, bus, kereta)", "Kebutuhan"],
+        ["Transportasi", "Pajak kendaraan", "Kebutuhan"],
+        ["Transportasi", "Asuransi kendaraan", "Kebutuhan"],
+        // Pendidikan (4)
+        ["Pendidikan", "Pembayaran SPP", "Kebutuhan"],
+        ["Pendidikan", "Buku & alat tulis", "Kebutuhan"],
+        ["Pendidikan", "Biaya kursus", "Investasi"],
+        ["Pendidikan", "Perlengkapan belajar", "Kebutuhan"],
+        // Kesehatan (6)
+        ["Kesehatan", "Asuransi kesehatan", "Kebutuhan"],
+        ["Kesehatan", "Obat-obatan", "Kebutuhan"],
+        ["Kesehatan", "Biaya dokter / rumah sakit", "Kebutuhan"],
+        ["Kesehatan", "Vitamin", "Keinginan"],
+        ["Kesehatan", "Alat kesehatan", "Kebutuhan"],
+        ["Kesehatan", "Membership gym", "Keinginan"],
+        // Anak & Bayi (5)
+        ["Anak & Bayi", "Popok", "Kebutuhan"],
+        ["Anak & Bayi", "Susu formula", "Kebutuhan"],
+        ["Anak & Bayi", "Mainan anak", "Keinginan"],
+        ["Anak & Bayi", "Perlengkapan bayi", "Kebutuhan"],
+        ["Anak & Bayi", "Pendidikan anak (PAUD)", "Kebutuhan"],
+        // Kebutuhan Pribadi (5)
+        ["Kebutuhan Pribadi", "Perawatan diri (salon, skincare, kosmetik)", "Kebutuhan"],
+        ["Kebutuhan Pribadi", "Pakaian", "Kebutuhan"],
+        ["Kebutuhan Pribadi", "Gadget", "Kebutuhan"],
+        ["Kebutuhan Pribadi", "Alas kaki", "Kebutuhan"],
+        ["Kebutuhan Pribadi", "Aksesoris diri", "Keinginan"],
+        // Hiburan & Lifestyle (6)
+        ["Hiburan & Lifestyle", "Nonton bioskop", "Keinginan"],
+        ["Hiburan & Lifestyle", "Nonton konser", "Keinginan"],
+        ["Hiburan & Lifestyle", "Jajan / Makan di luar", "Keinginan"],
+        ["Hiburan & Lifestyle", "Wisata", "Keinginan"],
+        ["Hiburan & Lifestyle", "Game", "Keinginan"],
+        ["Hiburan & Lifestyle", "Hobi", "Keinginan"],
+        // Sosial (5)
+        ["Sosial", "Amplop pernikahan", "Keinginan"],
+        ["Sosial", "Ulang tahun", "Keinginan"],
+        ["Sosial", "Sumbangan", "Kebutuhan"],
+        ["Sosial", "Zakat / infaq", "Kebutuhan"],
+        ["Sosial", "Sedekah", "Kebutuhan"],
+        // Investasi & Tabungan (9)
+        ["Investasi & Tabungan", "Tabungan rutin", "Investasi"],
+        ["Investasi & Tabungan", "Dana darurat", "Investasi"],
+        ["Investasi & Tabungan", "Saham", "Investasi"],
+        ["Investasi & Tabungan", "Reksadana", "Investasi"],
+        ["Investasi & Tabungan", "Emas", "Investasi"],
+        ["Investasi & Tabungan", "Deposito", "Investasi"],
+        ["Investasi & Tabungan", "Asuransi jiwa", "Investasi"],
+        ["Investasi & Tabungan", "Properti", "Investasi"],
+        ["Investasi & Tabungan", "Dana Pendidikan Anak", "Investasi"],
+        // Lain-lain (4)
+        ["Lain-lain", "Denda", "Kebutuhan"],
+        ["Lain-lain", "Tilang", "Kebutuhan"],
+        ["Lain-lain", "Biaya admin bank", "Kebutuhan"],
+        ["Lain-lain", "Pengeluaran tak terduga", "Kebutuhan"]
+      ];
+
+      const pemasukanRaw = [
+        // Gaji & Pendapatan Tetap (5)
+        ["Gaji & Pendapatan Tetap", "Gaji pokok"],
+        ["Gaji & Pendapatan Tetap", "Tunjangan"],
+        ["Gaji & Pendapatan Tetap", "Bonus"],
+        ["Gaji & Pendapatan Tetap", "THR"],
+        ["Gaji & Pendapatan Tetap", "Komisi"],
+        // Usaha & Freelance (4)
+        ["Usaha & Freelance", "Pendapatan usaha sendiri"],
+        ["Usaha & Freelance", "Pendapatan dari freelance"],
+        ["Usaha & Freelance", "Jasa"],
+        ["Usaha & Freelance", "Afiliasi"],
+        // Investasi (5)
+        ["Investasi", "Dividen saham"],
+        ["Investasi", "Bunga deposito"],
+        ["Investasi", "Pendapatan dari reksa dana"],
+        ["Investasi", "Sewa properti"],
+        ["Investasi", "Capital gain"],
+        // Pasif & Royalti (2)
+        ["Pasif & Royalti", "Royalti (buku, musik, karya seni)"],
+        ["Pasif & Royalti", "Lisensi penggunaan produk/jasa"]
+      ];
+
+      const list = [];
+      let idx = 1;
+      pengeluaranRaw.forEach(function(item) {
+        list.push({
+          ID_Kategori: "KAT-" + pad2(idx++),
+          Jenis: "Pengeluaran",
+          Kategori_Utama: item[0],
+          Sub_Kategori: item[1],
+          Pos_Budget: item[2]
+        });
+      });
+      pemasukanRaw.forEach(function(item) {
+        list.push({
+          ID_Kategori: "KAT-" + pad2(idx++),
+          Jenis: "Pemasukan",
+          Kategori_Utama: item[0],
+          Sub_Kategori: item[1],
+          Pos_Budget: "-"
+        });
+      });
+      return list;
+    }
+
+    function buildDummyData() {
+      const kategori = getDefaultMasterKategori();
+      const dompet = [
+        { ID_Dompet: "DMP-01", Nama_Dompet: "BSI Keluarga", Tipe: "Bank", Saldo_Awal: 4500000, Keterangan: "Rekening utama keluarga" },
+        { ID_Dompet: "DMP-02", Nama_Dompet: "Kas Tunai Rumah", Tipe: "Tunai", Saldo_Awal: 850000, Keterangan: "Uang belanja harian" },
+        { ID_Dompet: "DMP-03", Nama_Dompet: "GoPay & QRIS", Tipe: "E-Wallet", Saldo_Awal: 450000, Keterangan: "Transportasi & jajan" },
+        { ID_Dompet: "DMP-04", Nama_Dompet: "Tabungan Emas & RD", Tipe: "Investasi", Saldo_Awal: 6500000, Keterangan: "Dana darurat & pendidikan" }
+      ];
+
+      const transaksi = [];
+      const targetBulanan = [];
+      let txCounter = 1;
+
+      // Generate 6 bulan data (5 bulan lalu s/d bulan ini)
+      for (let offset = 5; offset >= 0; offset--) {
+        const d = new Date(nowDate.getFullYear(), nowDate.getMonth() - offset, 1);
+        const y = d.getFullYear();
+        const m = d.getMonth();
+        const ym = y + "-" + pad2(m + 1);
+        const factor = offset === 0 ? 1 : (0.88 + (offset % 3) * 0.06);
+
+        targetBulanan.push({
+          ID_Target_Bln: "TB-" + ym,
+          Bulan_Tahun: ym,
+          Target_Pengeluaran: 10000000,
+          Persen_Kebutuhan: 50,
+          Persen_Keinginan: 30,
+          Persen_Investasi: 20
+        });
+
+        // Pemasukan
+        const incomes = [
+          [1, "Gaji & Pendapatan Tetap", "Gaji pokok", "DMP-01", 6500000, "Gaji bulanan Abu Syauqi"],
+          [5, "Gaji & Pendapatan Tetap", "Tunjangan", "DMP-01", 1200000, "Tunjangan keluarga"],
+          [12, "Usaha & Freelance", "Pendapatan usaha sendiri", "DMP-01", Math.round(2800000 * factor), "Omzet toko online"],
+          [18, "Usaha & Freelance", "Pendapatan dari freelance", "DMP-01", Math.round(950000 * factor), "Proyek desain web"],
+          [22, "Investasi", "Dividen saham", "DMP-04", 250000, "Bagi hasil kuartalan"]
+        ];
+        incomes.forEach(function(inc) {
+          transaksi.push({
+            ID_Transaksi: "TX-" + String(txCounter++).padStart(4, "0"),
+            Tanggal: ym + "-" + pad2(inc[0]),
+            Jenis: "Pemasukan",
+            Kategori_Utama: inc[1],
+            Sub_Kategori: inc[2],
+            Pos_Budget: "-",
+            ID_Dompet: inc[3],
+            ID_Dompet_Tujuan: "",
+            Nominal: inc[4],
+            Catatan: inc[5],
+            Dicatat_Oleh: "Keluarga Abu Syauqi",
+            Created_At: ym + "-" + pad2(inc[0]) + "T08:00:00Z"
+          });
+        });
+
+        // Pengeluaran
+        const expenses = [
+          [2, "Kebutuhan Rumah Tangga", "Sewa / Cicilan rumah", "Kebutuhan", "DMP-01", 1500000, "Cicilan rumah bulanan"],
+          [3, "Kebutuhan Rumah Tangga", "Belanja bulanan", "Kebutuhan", "DMP-02", Math.round(1350000 * factor), "Sembako & dapur"],
+          [4, "Kebutuhan Rumah Tangga", "Listrik", "Kebutuhan", "DMP-01", 285000, "Token listrik rumah"],
+          [5, "Kebutuhan Rumah Tangga", "Internet", "Kebutuhan", "DMP-01", 295000, "WiFi rumah"],
+          [6, "Kebutuhan Rumah Tangga", "Air", "Kebutuhan", "DMP-01", 95000, "PDAM bulanan"],
+          [7, "Kebutuhan Rumah Tangga", "Gas (LPG)", "Kebutuhan", "DMP-02", 85000, "Gas 12kg"],
+          [8, "Sosial", "Sedekah", "Kebutuhan", "DMP-01", 350000, "Sedekah jumat & masjid"],
+          [9, "Sosial", "Zakat / infaq", "Kebutuhan", "DMP-01", 250000, "Infaq bulanan"],
+          [10, "Transportasi", "Bensin/BBM", "Kebutuhan", "DMP-03", Math.round(420000 * factor), "BBM motor & mobil"],
+          [11, "Pendidikan", "Pembayaran SPP", "Kebutuhan", "DMP-01", 450000, "SPP sekolah anak"],
+          [12, "Anak & Bayi", "Popok", "Kebutuhan", "DMP-02", 210000, "Popok bulanan"],
+          [13, "Anak & Bayi", "Susu formula", "Kebutuhan", "DMP-02", 265000, "Susu anak"],
+          [14, "Hiburan & Lifestyle", "Jajan / Makan di luar", "Keinginan", "DMP-03", Math.round(620000 * factor), "Makan bersama keluarga"],
+          [15, "Hiburan & Lifestyle", "Wisata", "Keinginan", "DMP-01", offset === 0 ? 1250000 : Math.round(750000 * factor), "Rekreasi akhir pekan"],
+          [16, "Kebutuhan Pribadi", "Perawatan diri (salon, skincare, kosmetik)", "Kebutuhan", "DMP-03", 260000, "Keperluan pribadi"],
+          [17, "Kebutuhan Pribadi", "Aksesoris diri", "Keinginan", "DMP-03", 185000, "Aksesoris"],
+          [18, "Kesehatan", "Obat-obatan", "Kebutuhan", "DMP-02", 115000, "Apotek keluarga"],
+          [19, "Kesehatan", "Vitamin", "Keinginan", "DMP-02", 140000, "Multivitamin anak"],
+          [20, "Investasi & Tabungan", "Dana darurat", "Investasi", "DMP-04", 900000, "Setor dana darurat"],
+          [21, "Investasi & Tabungan", "Tabungan rutin", "Investasi", "DMP-04", 550000, "Tabungan bulanan"],
+          [23, "Investasi & Tabungan", "Dana Pendidikan Anak", "Investasi", "DMP-04", 400000, "Tabungan pendidikan"],
+          [25, "Anak & Bayi", "Mainan anak", "Keinginan", "DMP-03", 120000, "Mainan edukasi"],
+          [26, "Kebutuhan Rumah Tangga", "TV Kabel / Streaming", "Kebutuhan", "DMP-03", 65000, "Langganan streaming"],
+          [27, "Lain-lain", "Biaya admin bank", "Kebutuhan", "DMP-01", 15000, "Biaya admin bulanan"]
+        ];
+
+        expenses.forEach(function(ex) {
+          transaksi.push({
+            ID_Transaksi: "TX-" + String(txCounter++).padStart(4, "0"),
+            Tanggal: ym + "-" + pad2(ex[0]),
+            Jenis: "Pengeluaran",
+            Kategori_Utama: ex[1],
+            Sub_Kategori: ex[2],
+            Pos_Budget: ex[3],
+            ID_Dompet: ex[4],
+            ID_Dompet_Tujuan: "",
+            Nominal: ex[5],
+            Catatan: ex[6],
+            Dicatat_Oleh: "Keluarga Abu Syauqi",
+            Created_At: ym + "-" + pad2(ex[0]) + "T12:00:00Z"
+          });
+        });
+      }
+
+      const targetTabungan = [
+        { ID_Target: "GL-01", Nama_Target: "Dana Darurat 6x Pengeluaran", Target_Nominal: 50000000, Terkumpul: 18500000, Tenggat_Waktu: (nowDate.getFullYear() + 1) + "-12-31", Status: "Berjalan" },
+        { ID_Target: "GL-02", Nama_Target: "Tabungan Kurban 1448H", Target_Nominal: 3500000, Terkumpul: 2100000, Tenggat_Waktu: (nowDate.getFullYear() + 1) + "-05-15", Status: "Berjalan" },
+        { ID_Target: "GL-03", Nama_Target: "Dana Pendidikan Masuk SD", Target_Nominal: 15000000, Terkumpul: 6400000, Tenggat_Waktu: (nowDate.getFullYear() + 2) + "-06-01", Status: "Berjalan" }
+      ];
+
+      const curYm = nowDate.getFullYear() + "-" + pad2(nowDate.getMonth() + 1);
+      const tagihan = [
+        { ID_Tagihan: "TGH-01", Nama_Item: "Cicilan Rumah BSI", Tipe: "Tagihan Rutin", Nominal: 1500000, Jatuh_Tempo: curYm + "-05", Status: "Lunas", Catatan: "Auto-debet BSI" },
+        { ID_Tagihan: "TGH-02", Nama_Item: "Internet WiFi Rumah", Tipe: "Tagihan Rutin", Nominal: 295000, Jatuh_Tempo: curYm + "-15", Status: "Lunas", Catatan: "IndiHome" },
+        { ID_Tagihan: "TGH-03", Nama_Item: "SPP Sekolah Anak", Tipe: "Tagihan Rutin", Nominal: 450000, Jatuh_Tempo: curYm + "-20", Status: "Belum Lunas", Catatan: "Transfer ke bendahara" },
+        { ID_Tagihan: "TGH-04", Nama_Item: "Iuran Keamanan & Sampah", Tipe: "Tagihan Rutin", Nominal: 75000, Jatuh_Tempo: curYm + "-28", Status: "Belum Lunas", Catatan: "Bayar ke RT" }
+      ];
+
+      return {
+        dompet: dompet,
+        kategori: kategori,
+        transaksi: transaksi,
+        targetBulanan: targetBulanan,
+        targetTabungan: targetTabungan,
+        tagihan: tagihan
+      };
+    }
+
+    // =========================================================================
+    // 4. LAYER KOMUNIKASI API (PREVIEW LOCALSTORAGE vs GOOGLE APPS SCRIPT)
+    // =========================================================================
+    function ensureDefaultCategories(katList) {
+      const list = Array.isArray(katList) ? katList.slice() : [];
+      const defaults = getDefaultMasterKategori();
+      let changed = false;
+      defaults.forEach(function(def) {
+        const exists = list.some(function(k) {
+          return String(k.Jenis).toLowerCase() === String(def.Jenis).toLowerCase() &&
+                 String(k.Kategori_Utama).toLowerCase() === String(def.Kategori_Utama).toLowerCase() &&
+                 String(k.Sub_Kategori).toLowerCase() === String(def.Sub_Kategori).toLowerCase();
+        });
+        if (!exists) {
+          list.push(def);
+          changed = true;
+        }
+      });
+      return { list: list, changed: changed };
+    }
+
+    function savePreviewDB() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data));
+      } catch (e) {}
+    }
+
+    function loadPreviewDB() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.kategori)) {
+            const merged = ensureDefaultCategories(parsed.kategori);
+            parsed.kategori = merged.list;
+            if (merged.changed) {
+              try { localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed)); } catch (e) {}
+            }
+            return parsed;
+          }
+        }
+      } catch (e) {}
+      const fresh = buildDummyData();
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh)); } catch (e) {}
+      return fresh;
+    }
+
+    async function apiCall(action, payload) {
+      const body = payload || {};
+      if (IS_PREVIEW) {
+        return handlePreviewApi(action, body);
+      }
+
+      showLoader(true);
+      try {
+        const res = await fetch(GAS_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: action, payload: body })
+        });
+        const json = await res.json();
+        showLoader(false);
+        if (!json.success) {
+          showToast(json.message || "Terjadi kesalahan di server", "error");
+        }
+        return json;
+      } catch (err) {
+        showLoader(false);
+        showToast("Gagal terhubung ke Google Sheets: " + err.message, "error");
+        return { success: false, message: err.message };
+      }
+    }
+
+    function handlePreviewApi(action, p) {
+      if (action === "getAllData") {
+        const db = loadPreviewDB();
+        return { success: true, data: db };
+      }
+      if (action === "saveTransaction") {
+        if (p.ID_Transaksi) {
+          const idx = state.data.transaksi.findIndex(function(x) { return x.ID_Transaksi === p.ID_Transaksi; });
+          if (idx >= 0) state.data.transaksi[idx] = Object.assign({}, state.data.transaksi[idx], p);
+        } else {
+          p.ID_Transaksi = genId("TX");
+          p.Created_At = new Date().toISOString();
+          state.data.transaksi.unshift(p);
+        }
+        savePreviewDB();
+        return { success: true, data: p };
+      }
+      if (action === "deleteTransaction") {
+        state.data.transaksi = state.data.transaksi.filter(function(x) { return x.ID_Transaksi !== p.ID_Transaksi; });
+        savePreviewDB();
+        return { success: true };
+      }
+      if (action === "saveBudgetTarget") {
+        const idx = state.data.targetBulanan.findIndex(function(x) { return x.Bulan_Tahun === p.Bulan_Tahun; });
+        if (idx >= 0) {
+          state.data.targetBulanan[idx] = Object.assign({}, state.data.targetBulanan[idx], p);
+        } else {
+          p.ID_Target_Bln = "TB-" + p.Bulan_Tahun;
+          state.data.targetBulanan.push(p);
+        }
+        savePreviewDB();
+        return { success: true, data: p };
+      }
+      if (action === "saveWallet") {
+        if (p.ID_Dompet) {
+          const idx = state.data.dompet.findIndex(function(x) { return x.ID_Dompet === p.ID_Dompet; });
+          if (idx >= 0) state.data.dompet[idx] = Object.assign({}, state.data.dompet[idx], p);
+        } else {
+          p.ID_Dompet = genId("DMP");
+          state.data.dompet.push(p);
+        }
+        savePreviewDB();
+        return { success: true, data: p };
+      }
+      if (action === "deleteWallet") {
+        state.data.dompet = state.data.dompet.filter(function(x) { return x.ID_Dompet !== p.ID_Dompet; });
+        savePreviewDB();
+        return { success: true };
+      }
+      if (action === "saveGoal") {
+        if (p.ID_Target) {
+          const idx = state.data.targetTabungan.findIndex(function(x) { return x.ID_Target === p.ID_Target; });
+          if (idx >= 0) state.data.targetTabungan[idx] = Object.assign({}, state.data.targetTabungan[idx], p);
+        } else {
+          p.ID_Target = genId("GL");
+          state.data.targetTabungan.push(p);
+        }
+        savePreviewDB();
+        return { success: true, data: p };
+      }
+      if (action === "depositGoal") {
+        const g = state.data.targetTabungan.find(function(x) { return x.ID_Target === p.ID_Target; });
+        if (g) {
+          g.Terkumpul = (Number(g.Terkumpul) || 0) + (Number(p.Nominal) || 0);
+          g.Status = g.Terkumpul >= Number(g.Target_Nominal) ? "Tercapai" : "Berjalan";
+        }
+        if (p.catatTransaksi && p.ID_Dompet) {
+          state.data.transaksi.unshift({
+            ID_Transaksi: genId("TX"),
+            Tanggal: new Date().toISOString().slice(0, 10),
+            Jenis: "Pengeluaran",
+            Kategori_Utama: "Investasi & Tabungan",
+            Sub_Kategori: "Tabungan rutin",
+            Pos_Budget: "Investasi",
+            ID_Dompet: p.ID_Dompet,
+            ID_Dompet_Tujuan: "",
+            Nominal: Number(p.Nominal) || 0,
+            Catatan: "Setor Target: " + (g ? g.Nama_Target : ""),
+            Dicatat_Oleh: "Keluarga Abu Syauqi",
+            Created_At: new Date().toISOString()
+          });
+        }
+        savePreviewDB();
+        return { success: true };
+      }
+      if (action === "deleteGoal") {
+        state.data.targetTabungan = state.data.targetTabungan.filter(function(x) { return x.ID_Target !== p.ID_Target; });
+        savePreviewDB();
+        return { success: true };
+      }
+      if (action === "saveBill") {
+        if (p.ID_Tagihan) {
+          const idx = state.data.tagihan.findIndex(function(x) { return x.ID_Tagihan === p.ID_Tagihan; });
+          if (idx >= 0) state.data.tagihan[idx] = Object.assign({}, state.data.tagihan[idx], p);
+        } else {
+          p.ID_Tagihan = genId("TGH");
+          state.data.tagihan.push(p);
+        }
+        savePreviewDB();
+        return { success: true, data: p };
+      }
+      if (action === "toggleBill") {
+        const b = state.data.tagihan.find(function(x) { return x.ID_Tagihan === p.ID_Tagihan; });
+        if (b) b.Status = b.Status === "Lunas" ? "Belum Lunas" : "Lunas";
+        savePreviewDB();
+        return { success: true };
+      }
+      if (action === "deleteBill") {
+        state.data.tagihan = state.data.tagihan.filter(function(x) { return x.ID_Tagihan !== p.ID_Tagihan; });
+        savePreviewDB();
+        return { success: true };
+      }
+      if (action === "saveCategory") {
+        if (p.ID_Kategori) {
+          const idx = state.data.kategori.findIndex(function(x) { return x.ID_Kategori === p.ID_Kategori; });
+          if (idx >= 0) state.data.kategori[idx] = Object.assign({}, state.data.kategori[idx], p);
+        } else {
+          p.ID_Kategori = genId("KAT");
+          state.data.kategori.push(p);
+        }
+        savePreviewDB();
+        return { success: true, data: p };
+      }
+      if (action === "deleteCategory") {
+        state.data.kategori = state.data.kategori.filter(function(x) { return x.ID_Kategori !== p.ID_Kategori; });
+        savePreviewDB();
+        return { success: true };
+      }
+      return { success: false, message: "Action tidak dikenal" };
+    }
+
+    // =========================================================================
+    // 5. KALKULASI KEUANGAN & ANALITIK DASHBOARD
+    // =========================================================================
+    function getTransactionsByPeriod(year, monthIdx) {
+      const prefix = getBulanTahunKey(year, monthIdx);
+      return state.data.transaksi.filter(function(tx) {
+        return String(tx.Tanggal || "").startsWith(prefix);
+      });
+    }
+
+    function getTargetBulanan(year, monthIdx) {
+      const key = getBulanTahunKey(year, monthIdx);
+      return state.data.targetBulanan.find(function(t) { return t.Bulan_Tahun === key; }) || null;
+    }
+
+    function getWalletName(id) {
+      const w = state.data.dompet.find(function(x) { return x.ID_Dompet === id; });
+      return w ? w.Nama_Dompet : "-";
+    }
+
+    function getWalletBalance(id) {
+      const w = state.data.dompet.find(function(x) { return x.ID_Dompet === id; });
+      let bal = w ? (Number(w.Saldo_Awal) || 0) : 0;
+      state.data.transaksi.forEach(function(tx) {
+        const nom = Number(tx.Nominal) || 0;
+        if (tx.Jenis === "Pemasukan" && tx.ID_Dompet === id) bal += nom;
+        if (tx.Jenis === "Pengeluaran" && tx.ID_Dompet === id) bal -= nom;
+        if (tx.Jenis === "Transfer") {
+          if (tx.ID_Dompet === id) bal -= nom;
+          if (tx.ID_Dompet_Tujuan === id) bal += nom;
+        }
+      });
+      return bal;
+    }
+
+    function computeMonthMetrics(year, monthIdx) {
+      const list = getTransactionsByPeriod(year, monthIdx);
+      let income = 0, expense = 0, inCount = 0, exCount = 0;
+      const exBySub = {};
+      const exByMain = {};
+      const inBySub = {};
+      const inByMain = {};
+      const posMap = { Kebutuhan: {}, Keinginan: {}, Investasi: {} };
+      const posTotal = { Kebutuhan: 0, Keinginan: 0, Investasi: 0 };
+
+      const daysInMonth = new Date(year, monthIdx + 1, 0).getDate();
+      const dailyExpense = new Array(daysInMonth).fill(0);
+
+      list.forEach(function(tx) {
+        const nom = Number(tx.Nominal) || 0;
+        if (tx.Jenis === "Pemasukan") {
+          income += nom;
+          inCount++;
+          inBySub[tx.Sub_Kategori] = (inBySub[tx.Sub_Kategori] || 0) + nom;
+          inByMain[tx.Kategori_Utama] = (inByMain[tx.Kategori_Utama] || 0) + nom;
+        } else if (tx.Jenis === "Pengeluaran") {
+          expense += nom;
+          exCount++;
+          exBySub[tx.Sub_Kategori] = (exBySub[tx.Sub_Kategori] || 0) + nom;
+          exByMain[tx.Kategori_Utama] = (exByMain[tx.Kategori_Utama] || 0) + nom;
+          const pos = (tx.Pos_Budget === "Kebutuhan" || tx.Pos_Budget === "Keinginan" || tx.Pos_Budget === "Investasi")
+            ? tx.Pos_Budget
+            : "Kebutuhan";
+          posMap[pos][tx.Sub_Kategori] = (posMap[pos][tx.Sub_Kategori] || 0) + nom;
+          posTotal[pos] += nom;
+
+          const dayNum = Number(String(tx.Tanggal).split("-")[2]);
+          if (dayNum >= 1 && dayNum <= daysInMonth) {
+            dailyExpense[dayNum - 1] += nom;
+          }
+        }
+      });
+
+      const sortObj = function(obj) {
+        return Object.entries(obj)
+          .map(function(e) { return { name: e[0], total: e[1] }; })
+          .sort(function(a, b) { return b.total - a.total; });
+      };
+
+      return {
+        list: list,
+        income: income,
+        expense: expense,
+        saldo: income - expense,
+        totalTx: list.length,
+        inCount: inCount,
+        exCount: exCount,
+        topExSub: sortObj(exBySub),
+        topExMain: sortObj(exByMain),
+        topInSub: sortObj(inBySub),
+        topInMain: sortObj(inByMain),
+        exBySubMap: exBySub,
+        inBySubMap: inBySub,
+        posList: {
+          Kebutuhan: sortObj(posMap.Kebutuhan),
+          Keinginan: sortObj(posMap.Keinginan),
+          Investasi: sortObj(posMap.Investasi)
+        },
+        posTotal: posTotal,
+        dailyExpense: dailyExpense,
+        daysInMonth: daysInMonth
+      };
+    }
+
+    function pctChangeText(curr, prev) {
+      if (prev === 0 && curr === 0) return "0% vs bln lalu";
+      if (prev === 0) return "+100% vs bln lalu";
+      const diff = ((curr - prev) / Math.abs(prev)) * 100;
+      const sign = diff > 0 ? "+" : "";
+      return sign + diff.toFixed(1) + "% vs bln lalu";
+    }
+
+    // =========================================================================
+    // 6. NAVIGASI TOP BAR & BOTTOM NAVIGATION
+    // =========================================================================
+    function renderTopBar() {
+      const modeEl = document.getElementById("mode-indicator");
+      if (modeEl) {
+        modeEl.innerHTML = IS_PREVIEW
+          ? '<span class="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block"></span><span class="text-amber-700">Mode Preview (Data Lokal)</span>'
+          : '<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span><span class="text-emerald-700">Terhubung Google Sheets</span>';
+      }
+
+      const mSel = document.getElementById("global-month-select");
+      const ySel = document.getElementById("global-year-select");
+      if (mSel) {
+        mSel.innerHTML = BULAN_LIST.map(function(b, idx) {
+          return '<option value="' + idx + '"' + (idx === state.selectedMonth ? ' selected' : '') + '>' + b + '</option>';
+        }).join("");
+      }
+      if (ySel) {
+        const baseY = nowDate.getFullYear();
+        let yHtml = "";
+        for (let y = baseY - 2; y <= baseY + 2; y++) {
+          yHtml += '<option value="' + y + '"' + (y === state.selectedYear ? ' selected' : '') + '>' + y + '</option>';
+        }
+        ySel.innerHTML = yHtml;
+      }
+    }
+
+    function onGlobalPeriodChange() {
+      state.selectedMonth = Number(document.getElementById("global-month-select").value);
+      state.selectedYear = Number(document.getElementById("global-year-select").value);
+      renderCurrentPage();
+    }
+
+    function shiftPeriod(delta) {
+      const d = new Date(state.selectedYear, state.selectedMonth + delta, 1);
+      state.selectedYear = d.getFullYear();
+      state.selectedMonth = d.getMonth();
+      renderTopBar();
+      renderCurrentPage();
+    }
+
+    function renderBottomNav() {
+      const nav = document.getElementById("app-bottom-nav");
+      const isLainnyaGroup = ["lainnya", "dompet", "tabungan", "tagihan", "laporan", "pengaturan"].indexOf(state.activePage) >= 0;
+
+      const btn = function(id, icon, label, isActive) {
+        return '<button onclick="navigateTo(\'' + id + '\')" class="flex-1 flex flex-col items-center justify-center py-1 min-h-[46px] active:scale-95 transition ' + (isActive ? 'text-teal-700' : 'text-slate-400 hover:text-slate-600') + '">' +
+          '<i class="fa-solid ' + icon + ' text-[17px] mb-0.5"></i>' +
+          '<span class="text-[10px] ' + (isActive ? 'font-extrabold' : 'font-semibold') + '">' + label + '</span>' +
+          '</button>';
+      };
+
+      nav.innerHTML =
+        btn("dashboard", "fa-chart-pie", "Dashboard", state.activePage === "dashboard") +
+        btn("transaksi", "fa-arrow-right-arrow-left", "Transaksi", state.activePage === "transaksi") +
+        '<div class="flex-1 flex justify-center -mt-6">' +
+          '<button onclick="openTransaksiSheet()" class="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-700 to-emerald-500 text-white shadow-lg shadow-teal-700/30 flex items-center justify-center active:scale-90 transition border-4 border-white" aria-label="Tambah Transaksi">' +
+            '<i class="fa-solid fa-plus text-xl"></i>' +
+          '</button>' +
+        '</div>' +
+        btn("anggaran", "fa-scale-balanced", "Anggaran", state.activePage === "anggaran") +
+        btn("lainnya", "fa-grid-2", "Lainnya", isLainnyaGroup);
+    }
+
+    function navigateTo(page) {
+      state.activePage = page;
+      renderBottomNav();
+      renderCurrentPage();
+      const scroller = document.getElementById("app-main-scroll");
+      if (scroller) scroller.scrollTop = 0;
+    }
+
+    function renderCurrentPage() {
+      destroyAllCharts();
+      const c = document.getElementById("page-container");
+      if (!c) return;
+      if (state.activePage === "dashboard") renderDashboardPage(c);
+      else if (state.activePage === "transaksi") renderTransaksiPage(c);
+      else if (state.activePage === "anggaran") renderAnggaranPage(c);
+      else if (state.activePage === "lainnya") renderLainnyaPage(c);
+      else if (state.activePage === "dompet") renderDompetPage(c);
+      else if (state.activePage === "tabungan") renderTabunganPage(c);
+      else if (state.activePage === "tagihan") renderTagihanPage(c);
+      else if (state.activePage === "laporan") renderLaporanPage(c);
+      else if (state.activePage === "pengaturan") renderPengaturanPage(c);
+    }
+
+    // =========================================================================
+    // 7. HALAMAN DASHBOARD (LENGKAP SESUAI REFERENSI)
+    // =========================================================================
+    function renderDashboardPage(container) {
+      const cur = computeMonthMetrics(state.selectedYear, state.selectedMonth);
+      const prevInfo = getPrevMonthYear(state.selectedYear, state.selectedMonth);
+      const prev = computeMonthMetrics(prevInfo.year, prevInfo.month);
+      const targetObj = getTargetBulanan(state.selectedYear, state.selectedMonth);
+      const targetNom = targetObj ? (Number(targetObj.Target_Pengeluaran) || 0) : 0;
+      const pKeb = targetObj ? (Number(targetObj.Persen_Kebutuhan) || 50) : 50;
+      const pKei = targetObj ? (Number(targetObj.Persen_Keinginan) || 30) : 30;
+      const pInv = targetObj ? (Number(targetObj.Persen_Investasi) || 20) : 20;
+
+      // Bar Rasio Pemasukan vs Pengeluaran
+      const totalFlow = cur.income + cur.expense;
+      const inRatio = totalFlow > 0 ? Math.round((cur.income / totalFlow) * 100) : 50;
+      const exRatio = 100 - inRatio;
+
+      // Mini Report Otomatis
+      let miniReportText = "Belum ada pengeluaran tercatat di bulan ini. Yuk catat transaksi harian keluarga secara rutin!";
+      if (cur.topExSub.length > 0) {
+        const top1 = cur.topExSub[0];
+        miniReportText = "Wah, <b>'" + escapeHtml(top1.name) + "'</b> sebesar <b>" + formatRp(top1.total) + "</b> menjadi pengeluaran terbesar bulan ini. Coba direview lagi, apakah sudah sesuai prioritas keluarga?";
+      }
+
+      // % Budget Digunakan
+      const pctUsed = targetNom > 0 ? Math.min(999, Math.round((cur.expense / targetNom) * 100)) : 0;
+
+      // 6 Bulan Terakhir
+      const last6 = [];
+      for (let i = 0; i < 6; i++) {
+        const d = new Date(state.selectedYear, state.selectedMonth - i, 1);
+        const mMet = computeMonthMetrics(d.getFullYear(), d.getMonth());
+        last6.push({
+          label: BULAN_LIST[d.getMonth()].slice(0, 3) + " " + d.getFullYear(),
+          fullLabel: BULAN_LIST[d.getMonth()] + " " + d.getFullYear(),
+          income: mMet.income,
+          expense: mMet.expense,
+          saldo: mMet.saldo,
+          tx: mMet.totalTx
+        });
+      }
+      const avg6 = {
+        income: last6.reduce(function(s, x) { return s + x.income; }, 0) / 6,
+        expense: last6.reduce(function(s, x) { return s + x.expense; }, 0) / 6,
+        saldo: last6.reduce(function(s, x) { return s + x.saldo; }, 0) / 6,
+        tx: Math.round(last6.reduce(function(s, x) { return s + x.tx; }, 0) / 6)
+      };
+
+      // Rencana vs Realita 50/30/20
+      const planKeb = Math.round(targetNom * (pKeb / 100));
+      const planKei = Math.round(targetNom * (pKei / 100));
+      const planInv = Math.round(targetNom * (pInv / 100));
+      const realKebPct = targetNom > 0 ? Math.round((cur.posTotal.Kebutuhan / targetNom) * 100) : 0;
+      const realKeiPct = targetNom > 0 ? Math.round((cur.posTotal.Keinginan / targetNom) * 100) : 0;
+      const realInvPct = targetNom > 0 ? Math.round((cur.posTotal.Investasi / targetNom) * 100) : 0;
+
+      // Tab Analisis Pengeluaran Content
+      let exTabHtml = "";
+      if (state.dashExTab === "top21") {
+        const rows = cur.topExSub.slice(0, 21).map(function(item, idx) {
+          return '<tr class="border-b border-slate-100 last:border-0">' +
+            '<td class="py-1.5 pr-2 text-[11px] font-bold text-slate-400 w-6">' + (idx + 1) + '</td>' +
+            '<td class="py-1.5 pr-2 text-[11px] font-semibold text-slate-700">' + escapeHtml(item.name) + '</td>' +
+            '<td class="py-1.5 text-right text-[11px] font-extrabold text-rose-600 whitespace-nowrap">' + formatRp(item.total) + '</td>' +
+            '</tr>';
+        }).join("");
+        exTabHtml =
+          '<div class="max-h-64 overflow-y-auto app-scroll">' +
+            (rows ? '<table class="w-full">' + rows + '</table>' : '<p class="text-xs text-slate-400 text-center py-6">Belum ada data pengeluaran</p>') +
+          '</div>' +
+          '<div class="mt-2 pt-2 border-t border-rose-100 flex items-center justify-between text-[11px] font-extrabold text-rose-700">' +
+            '<span>Total transaksi pengeluaran bulan ini</span><span>' + cur.exCount + ' transaksi</span>' +
+          '</div>';
+      } else if (state.dashExTab === "alokasi") {
+        const top10Main = cur.topExMain.slice(0, 10).map(function(item, idx) {
+          const pct = cur.expense > 0 ? ((item.total / cur.expense) * 100).toFixed(1) : "0.0";
+          return '<div class="flex items-center justify-between py-1.5 border-b border-slate-100 last:border-0 text-[11px]">' +
+            '<span class="font-semibold text-slate-700 truncate pr-2">' + (idx + 1) + '. ' + escapeHtml(item.name) + ' <span class="text-slate-400">(' + pct + '%)</span></span>' +
+            '<span class="font-extrabold text-slate-900 whitespace-nowrap">' + formatRp(item.total) + '</span>' +
+            '</div>';
+        }).join("");
+        exTabHtml =
+          '<div class="h-48 relative mb-3"><canvas id="chart-ex-donut"></canvas></div>' +
+          '<p class="text-[10px] font-extrabold uppercase tracking-wider text-rose-600 mb-1">Top 10 Kategori Pengeluaran</p>' +
+          (top10Main || '<p class="text-xs text-slate-400 text-center py-4">Belum ada data</p>') +
+          '<div class="mt-2 pt-2 border-t border-rose-100 flex justify-between text-xs font-extrabold text-rose-700">' +
+            '<span>TOTAL</span><span>' + formatRp(cur.expense) + '</span>' +
+          '</div>';
+      } else {
+        const allExSubs = Array.from(new Set(Object.keys(cur.exBySubMap).concat(Object.keys(prev.exBySubMap))));
+        const compRows = allExSubs.map(function(sub) {
+          const cVal = cur.exBySubMap[sub] || 0;
+          const pVal = prev.exBySubMap[sub] || 0;
+          const pct = pVal > 0 ? (((cVal - pVal) / pVal) * 100).toFixed(0) : (cVal > 0 ? 100 : 0);
+          return { sub: sub, cVal: cVal, pVal: pVal, pct: Number(pct) };
+        }).sort(function(a, b) { return b.cVal - a.cVal; }).slice(0, 15).map(function(r) {
+          const color = r.pct > 0 ? "text-rose-600" : (r.pct < 0 ? "text-emerald-600" : "text-slate-400");
+          return '<tr class="border-b border-slate-100 last:border-0 text-[10px]">' +
+            '<td class="py-1.5 pr-1 font-semibold text-slate-700">' + escapeHtml(r.sub) + '</td>' +
+            '<td class="py-1.5 px-1 text-right font-bold text-slate-900">' + formatShortRp(r.cVal) + '</td>' +
+            '<td class="py-1.5 px-1 text-right text-slate-500">' + formatShortRp(r.pVal) + '</td>' +
+            '<td class="py-1.5 pl-1 text-right font-extrabold ' + color + '">' + (r.pct > 0 ? "+" : "") + r.pct + '%</td>' +
+            '</tr>';
+        }).join("");
+        exTabHtml =
+          '<div class="max-h-64 overflow-y-auto app-scroll">' +
+            '<table class="w-full">' +
+              '<thead><tr class="text-[10px] text-slate-400 border-b border-slate-200">' +
+                '<th class="text-left pb-1">Sub Kategori</th><th class="text-right pb-1">Bln Ini</th><th class="text-right pb-1">Bln Lalu</th><th class="text-right pb-1">%</th>' +
+              '</tr></thead>' +
+              '<tbody>' + (compRows || '<tr><td colspan="4" class="text-center py-4 text-slate-400 text-xs">Belum ada data</td></tr>') + '</tbody>' +
+            '</table>' +
+          '</div>';
+      }
+
+      // Tab Analisis Pemasukan Content
+      let inTabHtml = "";
+      if (state.dashInTab === "top10") {
+        const rows = cur.topInSub.slice(0, 10).map(function(item, idx) {
+          return '<tr class="border-b border-slate-100 last:border-0">' +
+            '<td class="py-1.5 pr-2 text-[11px] font-bold text-slate-400 w-6">' + (idx + 1) + '</td>' +
+            '<td class="py-1.5 pr-2 text-[11px] font-semibold text-slate-700">' + escapeHtml(item.name) + '</td>' +
+            '<td class="py-1.5 text-right text-[11px] font-extrabold text-teal-700 whitespace-nowrap">' + formatRp(item.total) + '</td>' +
+            '</tr>';
+        }).join("");
+        inTabHtml =
+          (rows ? '<table class="w-full">' + rows + '</table>' : '<p class="text-xs text-slate-400 text-center py-6">Belum ada pemasukan</p>') +
+          '<div class="mt-2 pt-2 border-t border-teal-100 flex justify-between text-[11px] font-extrabold text-teal-700">' +
+            '<span>Transaksi pemasukan bulan ini</span><span>' + cur.inCount + ' transaksi</span>' +
+          '</div>';
+      } else if (state.dashInTab === "kategori") {
+        const listInMain = cur.topInMain.map(function(item, idx) {
+          return '<div class="flex items-center justify-between py-1.5 border-b border-slate-100 last:border-0 text-[11px]">' +
+            '<span class="font-semibold text-slate-700">' + (idx + 1) + '. ' + escapeHtml(item.name) + '</span>' +
+            '<span class="font-extrabold text-teal-700">' + formatRp(item.total) + '</span>' +
+            '</div>';
+        }).join("");
+        inTabHtml =
+          '<div class="h-44 relative mb-2"><canvas id="chart-in-donut"></canvas></div>' +
+          (listInMain || '<p class="text-xs text-slate-400 text-center py-4">Belum ada data</p>') +
+          '<div class="mt-2 pt-2 border-t border-teal-100 flex justify-between text-xs font-extrabold text-teal-700">' +
+            '<span>TOTAL</span><span>' + formatRp(cur.income) + '</span>' +
+          '</div>';
+      } else {
+        inTabHtml = '<div class="h-48 relative"><canvas id="chart-in-compare"></canvas></div>';
+      }
+
+      // Tab Budgeting 50/30/20 Rincian Sub Kategori
+      const activePosItems = cur.posList[state.dashBudgetTab] || [];
+      const activePosTotal = cur.posTotal[state.dashBudgetTab] || 0;
+      const posRowsHtml = activePosItems.map(function(item, idx) {
+        return '<div class="flex items-center justify-between py-1.5 border-b border-slate-100 last:border-0 text-[11px]">' +
+          '<span class="font-semibold text-slate-700 truncate pr-2">' + (idx + 1) + '. ' + escapeHtml(item.name) + '</span>' +
+          '<span class="font-extrabold text-slate-900 whitespace-nowrap">' + formatRp(item.total) + '</span>' +
+          '</div>';
+      }).join("");
+
+      container.innerHTML =
+        '<div class="space-y-3.5">' +
+          // 1. 4 KARTU KPI UTAMA (2x2 GRID)
+          '<div class="grid grid-cols-2 gap-2.5">' +
+            '<div class="bg-white rounded-2xl p-3 border border-teal-200/80 shadow-xs">' +
+              '<div class="flex items-center justify-between mb-1">' +
+                '<span class="text-[10px] font-extrabold uppercase text-teal-700">Total Pemasukan</span>' +
+                '<i class="fa-solid fa-arrow-trend-up text-teal-600 text-xs"></i>' +
+              '</div>' +
+              '<p class="text-[15px] font-extrabold text-slate-900 truncate">' + formatRp(cur.income) + '</p>' +
+              '<p class="text-[10px] font-semibold text-teal-600 mt-0.5">' + pctChangeText(cur.income, prev.income) + '</p>' +
+            '</div>' +
+
+            '<div class="bg-white rounded-2xl p-3 border border-rose-200/80 shadow-xs">' +
+              '<div class="flex items-center justify-between mb-1">' +
+                '<span class="text-[10px] font-extrabold uppercase text-rose-600">Total Pengeluaran</span>' +
+                '<i class="fa-solid fa-arrow-trend-down text-rose-500 text-xs"></i>' +
+              '</div>' +
+              '<p class="text-[15px] font-extrabold text-slate-900 truncate">' + formatRp(cur.expense) + '</p>' +
+              '<p class="text-[10px] font-semibold text-rose-500 mt-0.5">' + pctChangeText(cur.expense, prev.expense) + '</p>' +
+            '</div>' +
+
+            '<div class="bg-white rounded-2xl p-3 border border-purple-200/80 shadow-xs">' +
+              '<div class="flex items-center justify-between mb-1">' +
+                '<span class="text-[10px] font-extrabold uppercase text-purple-700">Sisa Saldo</span>' +
+                '<i class="fa-solid fa-piggy-bank text-purple-600 text-xs"></i>' +
+              '</div>' +
+              '<p class="text-[15px] font-extrabold ' + (cur.saldo >= 0 ? 'text-purple-800' : 'text-rose-600') + ' truncate">' + formatRp(cur.saldo) + '</p>' +
+              '<p class="text-[10px] font-semibold text-purple-600 mt-0.5">' + pctChangeText(cur.saldo, prev.saldo) + '</p>' +
+            '</div>' +
+
+            '<div class="bg-white rounded-2xl p-3 border border-amber-200/80 shadow-xs">' +
+              '<div class="flex items-center justify-between mb-1">' +
+                '<span class="text-[10px] font-extrabold uppercase text-amber-700">Total Transaksi</span>' +
+                '<i class="fa-solid fa-receipt text-amber-500 text-xs"></i>' +
+              '</div>' +
+              '<p class="text-[15px] font-extrabold text-slate-900">' + cur.totalTx + ' <span class="text-[11px] font-semibold text-slate-400">item</span></p>' +
+              '<p class="text-[10px] font-semibold text-amber-600 mt-0.5">' + pctChangeText(cur.totalTx, prev.totalTx) + '</p>' +
+            '</div>' +
+          '</div>' +
+
+          // 2. STATUS TARGET PENGELUARAN & BAR RASIO PEMASUKAN VS PENGELUARAN
+          '<div class="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-xs space-y-2.5">' +
+            (targetNom <= 0
+              ? '<div onclick="openTargetSheet()" class="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 cursor-pointer active:scale-[0.99] transition">' +
+                  '<span class="text-[11px] font-bold text-amber-800"><i class="fa-solid fa-bell mr-1.5"></i>Target pengeluaran belum diisi</span>' +
+                  '<span class="text-[11px] font-extrabold text-amber-900 underline">Atur</span>' +
+                '</div>'
+              : '<div onclick="openTargetSheet()" class="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 cursor-pointer">' +
+                  '<div><p class="text-[10px] font-bold text-slate-500">Target Pengeluaran</p><p class="text-xs font-extrabold text-slate-900">' + formatRp(targetNom) + '</p></div>' +
+                  '<span class="px-2.5 py-1 rounded-lg text-[11px] font-extrabold ' + (pctUsed > 100 ? 'bg-rose-100 text-rose-700' : 'bg-teal-100 text-teal-800') + '">' + pctUsed + '% Terpakai</span>' +
+                '</div>'
+            ) +
+            '<div>' +
+              '<div class="flex justify-between text-[10px] font-bold mb-1">' +
+                '<span class="text-teal-700">Pemasukan (' + inRatio + '%)</span>' +
+                '<span class="text-rose-600">Pengeluaran (' + exRatio + '%)</span>' +
+              '</div>' +
+              '<div class="w-full h-3 rounded-full bg-rose-500 overflow-hidden flex">' +
+                '<div class="h-full bg-teal-600 transition-all" style="width:' + inRatio + '%"></div>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+
+          // 3. MINI REPORTS (INSIGHT OTOMATIS)
+          '<div class="bg-gradient-to-br from-slate-800 to-slate-900 text-white rounded-2xl p-3.5 shadow-sm">' +
+            '<div class="flex items-center gap-2 mb-1">' +
+              '<span class="w-6 h-6 rounded-lg bg-amber-400/20 text-amber-300 flex items-center justify-center text-xs"><i class="fa-solid fa-wand-magic-sparkles"></i></span>' +
+              '<span class="text-[11px] font-extrabold uppercase tracking-wider text-amber-300">Mini Reports</span>' +
+            '</div>' +
+            '<p class="text-xs leading-relaxed text-slate-200">' + miniReportText + '</p>' +
+          '</div>' +
+
+          // 4. GRAFIK PENGELUARAN HARIAN
+          '<div class="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-xs">' +
+            '<div class="flex items-center justify-between mb-2">' +
+              '<h2 class="text-xs font-extrabold text-slate-800 uppercase tracking-wide"><i class="fa-solid fa-chart-line text-teal-700 mr-1.5"></i>Grafik Pengeluaran Harian</h2>' +
+              '<span class="text-[10px] font-bold text-slate-400">Tgl 1 - ' + cur.daysInMonth + '</span>' +
+            '</div>' +
+            '<div class="h-44 relative"><canvas id="chart-daily-expense"></canvas></div>' +
+          '</div>' +
+
+          // 5. ANALISIS PENGELUARAN (3 TAB)
+          '<div class="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-xs">' +
+            '<h2 class="text-xs font-extrabold text-rose-700 uppercase tracking-wide mb-2.5"><i class="fa-solid fa-fire mr-1.5"></i>Analisis Pengeluaran</h2>' +
+            '<div class="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl mb-3">' +
+              '<button onclick="setDashTab(\'ex\',\'top21\')" class="py-1.5 rounded-lg text-[10px] font-extrabold transition ' + (state.dashExTab === 'top21' ? 'bg-white text-rose-600 shadow-xs' : 'text-slate-500') + '">Top 21 Sub</button>' +
+              '<button onclick="setDashTab(\'ex\',\'alokasi\')" class="py-1.5 rounded-lg text-[10px] font-extrabold transition ' + (state.dashExTab === 'alokasi' ? 'bg-white text-rose-600 shadow-xs' : 'text-slate-500') + '">Alokasi</button>' +
+              '<button onclick="setDashTab(\'ex\',\'compare\')" class="py-1.5 rounded-lg text-[10px] font-extrabold transition ' + (state.dashExTab === 'compare' ? 'bg-white text-rose-600 shadow-xs' : 'text-slate-500') + '">VS Bln Lalu</button>' +
+            '</div>' +
+            exTabHtml +
+          '</div>' +
+
+          // 6. ANALISIS PEMASUKAN (3 TAB)
+          '<div class="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-xs">' +
+            '<h2 class="text-xs font-extrabold text-teal-700 uppercase tracking-wide mb-2.5"><i class="fa-solid fa-coins mr-1.5"></i>Analisis Pemasukan</h2>' +
+            '<div class="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl mb-3">' +
+              '<button onclick="setDashTab(\'in\',\'top10\')" class="py-1.5 rounded-lg text-[10px] font-extrabold transition ' + (state.dashInTab === 'top10' ? 'bg-white text-teal-700 shadow-xs' : 'text-slate-500') + '">Top 10 Sub</button>' +
+              '<button onclick="setDashTab(\'in\',\'kategori\')" class="py-1.5 rounded-lg text-[10px] font-extrabold transition ' + (state.dashInTab === 'kategori' ? 'bg-white text-teal-700 shadow-xs' : 'text-slate-500') + '">Kategori</button>' +
+              '<button onclick="setDashTab(\'in\',\'compare\')" class="py-1.5 rounded-lg text-[10px] font-extrabold transition ' + (state.dashInTab === 'compare' ? 'bg-white text-teal-700 shadow-xs' : 'text-slate-500') + '">VS Bln Lalu</button>' +
+            '</div>' +
+            inTabHtml +
+          '</div>' +
+
+          // 7. BUDGETING 50/30/20 (RENCANA VS REALITA + 3 RING CHART)
+          '<div class="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-xs space-y-3">' +
+            '<div class="flex items-center justify-between">' +
+              '<h2 class="text-xs font-extrabold text-slate-800 uppercase tracking-wide"><i class="fa-solid fa-scale-balanced text-amber-500 mr-1.5"></i>Budgeting ' + pKeb + '/' + pKei + '/' + pInv + '</h2>' +
+              '<button onclick="openTargetSheet()" class="text-[10px] font-extrabold text-teal-700 bg-teal-50 px-2.5 py-1 rounded-lg">Atur Target</button>' +
+            '</div>' +
+
+            // % Budget yang digunakan
+            '<div class="bg-slate-50 rounded-xl p-2.5 border border-slate-200/70">' +
+              '<div class="flex justify-between text-[11px] font-extrabold mb-1">' +
+                '<span class="text-slate-600">% Budget yang Digunakan</span>' +
+                '<span class="' + (pctUsed > 100 ? 'text-rose-600' : 'text-teal-700') + '">' + pctUsed + '%</span>' +
+              '</div>' +
+              '<div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">' +
+                '<div class="h-full ' + (pctUsed > 100 ? 'bg-rose-500' : 'bg-teal-600') + ' rounded-full" style="width:' + Math.min(100, pctUsed) + '%"></div>' +
+              '</div>' +
+            '</div>' +
+
+            // 3 Ring Charts
+            '<div class="grid grid-cols-3 gap-2 text-center">' +
+              '<div class="bg-rose-50/70 rounded-xl p-2 border border-rose-100">' +
+                '<div class="h-16 relative mx-auto"><canvas id="chart-ring-keb"></canvas></div>' +
+                '<p class="text-[10px] font-extrabold text-rose-700 mt-1">' + realKebPct + '% / ' + pKeb + '%</p>' +
+                '<p class="text-[9px] font-bold text-slate-500 uppercase">Kebutuhan</p>' +
+              '</div>' +
+              '<div class="bg-amber-50/70 rounded-xl p-2 border border-amber-100">' +
+                '<div class="h-16 relative mx-auto"><canvas id="chart-ring-kei"></canvas></div>' +
+                '<p class="text-[10px] font-extrabold text-amber-700 mt-1">' + realKeiPct + '% / ' + pKei + '%</p>' +
+                '<p class="text-[9px] font-bold text-slate-500 uppercase">Keinginan</p>' +
+              '</div>' +
+              '<div class="bg-teal-50/70 rounded-xl p-2 border border-teal-100">' +
+                '<div class="h-16 relative mx-auto"><canvas id="chart-ring-inv"></canvas></div>' +
+                '<p class="text-[10px] font-extrabold text-teal-700 mt-1">' + realInvPct + '% / ' + pInv + '%</p>' +
+                '<p class="text-[9px] font-bold text-slate-500 uppercase">Investasi</p>' +
+              '</div>' +
+            '</div>' +
+
+            // Tabel Rencana VS Realita
+            '<table class="w-full text-[10px]">' +
+              '<thead><tr class="bg-slate-800 text-white">' +
+                '<th class="py-1.5 px-2 text-left rounded-tl-lg">Pos</th>' +
+                '<th class="py-1.5 px-2 text-right">Rencana</th>' +
+                '<th class="py-1.5 px-2 text-right rounded-tr-lg">Realita</th>' +
+              '</tr></thead>' +
+              '<tbody>' +
+                '<tr class="border-b border-slate-100"><td class="py-1.5 px-2 font-bold text-rose-700">' + pKeb + '% Kebutuhan</td><td class="py-1.5 px-2 text-right text-slate-600">' + formatRp(planKeb) + '</td><td class="py-1.5 px-2 text-right font-extrabold text-slate-900">' + formatRp(cur.posTotal.Kebutuhan) + '</td></tr>' +
+                '<tr class="border-b border-slate-100"><td class="py-1.5 px-2 font-bold text-amber-700">' + pKei + '% Keinginan</td><td class="py-1.5 px-2 text-right text-slate-600">' + formatRp(planKei) + '</td><td class="py-1.5 px-2 text-right font-extrabold text-slate-900">' + formatRp(cur.posTotal.Keinginan) + '</td></tr>' +
+                '<tr><td class="py-1.5 px-2 font-bold text-teal-700">' + pInv + '% Investasi</td><td class="py-1.5 px-2 text-right text-slate-600">' + formatRp(planInv) + '</td><td class="py-1.5 px-2 text-right font-extrabold text-slate-900">' + formatRp(cur.posTotal.Investasi) + '</td></tr>' +
+              '</tbody>' +
+            '</table>' +
+
+            // Rincian Sub Kategori per Pos
+            '<div>' +
+              '<div class="grid grid-cols-3 gap-1 bg-slate-100 p-1 rounded-xl mb-2">' +
+                '<button onclick="setDashTab(\'budget\',\'Kebutuhan\')" class="py-1.5 rounded-lg text-[10px] font-extrabold transition ' + (state.dashBudgetTab === 'Kebutuhan' ? 'bg-rose-600 text-white shadow-xs' : 'text-slate-600') + '">Kebutuhan</button>' +
+                '<button onclick="setDashTab(\'budget\',\'Keinginan\')" class="py-1.5 rounded-lg text-[10px] font-extrabold transition ' + (state.dashBudgetTab === 'Keinginan' ? 'bg-amber-500 text-white shadow-xs' : 'text-slate-600') + '">Keinginan</button>' +
+                '<button onclick="setDashTab(\'budget\',\'Investasi\')" class="py-1.5 rounded-lg text-[10px] font-extrabold transition ' + (state.dashBudgetTab === 'Investasi' ? 'bg-teal-600 text-white shadow-xs' : 'text-slate-600') + '">Investasi</button>' +
+              '</div>' +
+              '<div class="max-h-44 overflow-y-auto app-scroll">' +
+                (posRowsHtml || '<p class="text-[11px] text-slate-400 text-center py-3">Belum ada transaksi di pos ini</p>') +
+              '</div>' +
+              '<div class="mt-2 pt-2 border-t border-slate-100 flex justify-between text-[11px] font-extrabold text-slate-800">' +
+                '<span>Subtotal ' + state.dashBudgetTab + '</span><span>' + formatRp(activePosTotal) + '</span>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+
+          // 8. KEUANGAN 6 BULAN TERAKHIR
+          '<div class="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-xs space-y-3">' +
+            '<h2 class="text-xs font-extrabold text-slate-800 uppercase tracking-wide"><i class="fa-solid fa-calendar-days text-purple-600 mr-1.5"></i>Keuangan 6 Bulan Terakhir</h2>' +
+            '<div class="h-44 relative"><canvas id="chart-last6"></canvas></div>' +
+            '<div class="overflow-x-auto">' +
+              '<table class="w-full text-[10px]">' +
+                '<thead><tr class="bg-slate-100 text-slate-600">' +
+                  '<th class="py-1.5 px-1.5 text-left rounded-tl-lg">Bulan</th>' +
+                  '<th class="py-1.5 px-1 text-right text-teal-700">Masuk</th>' +
+                  '<th class="py-1.5 px-1 text-right text-rose-600">Keluar</th>' +
+                  '<th class="py-1.5 px-1 text-right text-purple-700">Saldo</th>' +
+                  '<th class="py-1.5 px-1.5 text-right rounded-tr-lg">Tx</th>' +
+                '</tr></thead>' +
+                '<tbody>' +
+                  last6.map(function(row) {
+                    return '<tr class="border-b border-slate-100">' +
+                      '<td class="py-1.5 px-1.5 font-bold text-slate-700 whitespace-nowrap">' + row.label + '</td>' +
+                      '<td class="py-1.5 px-1 text-right font-semibold text-teal-700">' + formatShortRp(row.income) + '</td>' +
+                      '<td class="py-1.5 px-1 text-right font-semibold text-rose-600">' + formatShortRp(row.expense) + '</td>' +
+                      '<td class="py-1.5 px-1 text-right font-bold ' + (row.saldo >= 0 ? 'text-purple-700' : 'text-rose-600') + '">' + formatShortRp(row.saldo) + '</td>' +
+                      '<td class="py-1.5 px-1.5 text-right text-slate-500">' + row.tx + '</td>' +
+                    '</tr>';
+                  }).join("") +
+                  '<tr class="bg-slate-800 text-white font-extrabold">' +
+                    '<td class="py-1.5 px-1.5 rounded-bl-lg">RATA-RATA</td>' +
+                    '<td class="py-1.5 px-1 text-right">' + formatShortRp(avg6.income) + '</td>' +
+                    '<td class="py-1.5 px-1 text-right">' + formatShortRp(avg6.expense) + '</td>' +
+                    '<td class="py-1.5 px-1 text-right">' + formatShortRp(avg6.saldo) + '</td>' +
+                    '<td class="py-1.5 px-1.5 text-right rounded-br-lg">' + avg6.tx + '</td>' +
+                  '</tr>' +
+                '</tbody>' +
+              '</table>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+
+      // Render Charts Dashboard
+      initDashboardCharts(cur, prev, last6, realKebPct, realKeiPct, realInvPct, pKeb, pKei, pInv);
+    }
+
+    function setDashTab(group, val) {
+      if (group === "ex") state.dashExTab = val;
+      if (group === "in") state.dashInTab = val;
+      if (group === "budget") state.dashBudgetTab = val;
+      renderCurrentPage();
+    }
+
+    function initDashboardCharts(cur, prev, last6, rKeb, rKei, rInv, pKeb, pKei, pInv) {
+      // 1. Line Chart Pengeluaran Harian
+      const dailyCtx = document.getElementById("chart-daily-expense");
+      if (dailyCtx) {
+        chartInstances.daily = new Chart(dailyCtx, {
+          type: "line",
+          data: {
+            labels: cur.dailyExpense.map(function(_, i) { return String(i + 1); }),
+            datasets: [{
+              label: "Pengeluaran",
+              data: cur.dailyExpense,
+              borderColor: "#0f766e",
+              backgroundColor: "rgba(15, 118, 110, 0.12)",
+              borderWidth: 2,
+              pointRadius: 2.5,
+              pointBackgroundColor: "#0f766e",
+              fill: true,
+              tension: 0.35
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { display: false } },
+            scales: {
+              x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+              y: {
+                beginAtZero: true,
+                ticks: { font: { size: 9 }, callback: function(v) { return formatShortRp(v); } }
+              }
+            }
+          }
+        });
+      }
+
+      // 2. Donut Alokasi Kategori Pengeluaran (jika tab alokasi aktif)
+      const exDonutCtx = document.getElementById("chart-ex-donut");
+      if (exDonutCtx && cur.topExMain.length > 0) {
+        const palette = ["#e11d48", "#f97316", "#eab308", "#0d9488", "#0284c7", "#6366f1", "#a855f7", "#ec4899", "#64748b", "#14b8a6"];
+        chartInstances.exDonut = new Chart(exDonutCtx, {
+          type: "doughnut",
+          data: {
+            labels: cur.topExMain.map(function(x) { return x.name; }),
+            datasets: [{
+              data: cur.topExMain.map(function(x) { return x.total; }),
+              backgroundColor: palette,
+              borderWidth: 2,
+              borderColor: "#ffffff"
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "60%",
+            plugins: {
+              legend: { position: "right", labels: { boxWidth: 10, font: { size: 9 } } }
+            }
+          }
+        });
+      }
+
+      // 3. Donut Kategori Pemasukan
+      const inDonutCtx = document.getElementById("chart-in-donut");
+      if (inDonutCtx && cur.topInMain.length > 0) {
+        chartInstances.inDonut = new Chart(inDonutCtx, {
+          type: "doughnut",
+          data: {
+            labels: cur.topInMain.map(function(x) { return x.name; }),
+            datasets: [{
+              data: cur.topInMain.map(function(x) { return x.total; }),
+              backgroundColor: ["#0f766e", "#f97316", "#0284c7", "#8b5cf6"],
+              borderWidth: 2,
+              borderColor: "#ffffff"
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "62%",
+            plugins: {
+              legend: { position: "right", labels: { boxWidth: 10, font: { size: 9 } } }
+            }
+          }
+        });
+      }
+
+      // 4. Bar Chart Perbandingan Pemasukan Bulan Ini vs Bulan Lalu
+      const inCompCtx = document.getElementById("chart-in-compare");
+      if (inCompCtx) {
+        const allInMain = Array.from(new Set(
+          cur.topInMain.map(function(x) { return x.name; }).concat(prev.topInMain.map(function(x) { return x.name; }))
+        ));
+        const getVal = function(arr, name) {
+          const found = arr.find(function(x) { return x.name === name; });
+          return found ? found.total : 0;
+        };
+        chartInstances.inComp = new Chart(inCompCtx, {
+          type: "bar",
+          data: {
+            labels: allInMain.map(function(s) { return s.length > 14 ? s.slice(0, 14) + ".." : s; }),
+            datasets: [
+              { label: "Bulan Ini", data: allInMain.map(function(n) { return getVal(cur.topInMain, n); }), backgroundColor: "#0f766e", borderRadius: 6 },
+              { label: "Bulan Lalu", data: allInMain.map(function(n) { return getVal(prev.topInMain, n); }), backgroundColor: "#94a3b8", borderRadius: 6 }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { boxWidth: 10, font: { size: 10 } } } },
+            scales: {
+              x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+              y: { beginAtZero: true, ticks: { font: { size: 9 }, callback: function(v) { return formatShortRp(v); } } }
+            }
+          }
+        });
+      }
+
+      // 5. Tiga Ring Charts 50/30/20
+      const makeRing = function(canvasId, key, val, target, color, bg) {
+        const ctx = document.getElementById(canvasId);
+        if (!ctx) return;
+        const filled = Math.min(val, target);
+        const rem = Math.max(0, target - filled);
+        chartInstances[key] = new Chart(ctx, {
+          type: "doughnut",
+          data: {
+            datasets: [{
+              data: [filled, rem > 0 ? rem : (filled === 0 ? 1 : 0)],
+              backgroundColor: [color, bg],
+              borderWidth: 0
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: "72%",
+            plugins: { legend: { display: false }, tooltip: { enabled: false } }
+          }
+        });
+      };
+      makeRing("chart-ring-keb", "ringKeb", rKeb, pKeb, "#e11d48", "#ffe4e6");
+      makeRing("chart-ring-kei", "ringKei", rKei, pKei, "#f59e0b", "#fef3c7");
+      makeRing("chart-ring-inv", "ringInv", rInv, pInv, "#0d9488", "#ccfbf1");
+
+      // 6. Bar Chart 6 Bulan Terakhir
+      const last6Ctx = document.getElementById("chart-last6");
+      if (last6Ctx) {
+        const rev = last6.slice().reverse();
+        chartInstances.last6 = new Chart(last6Ctx, {
+          type: "bar",
+          data: {
+            labels: rev.map(function(x) { return x.label.split(" ")[0]; }),
+            datasets: [
+              { label: "Masuk", data: rev.map(function(x) { return x.income; }), backgroundColor: "#0f766e", borderRadius: 4 },
+              { label: "Keluar", data: rev.map(function(x) { return x.expense; }), backgroundColor: "#e11d48", borderRadius: 4 },
+              { label: "Saldo", data: rev.map(function(x) { return x.saldo; }), backgroundColor: "#7e22ce", borderRadius: 4 }
+            ]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { legend: { labels: { boxWidth: 9, font: { size: 9 } } } },
+            scales: {
+              x: { grid: { display: false }, ticks: { font: { size: 9 } } },
+              y: { ticks: { font: { size: 9 }, callback: function(v) { return formatShortRp(v); } } }
+            }
+          }
+        });
+      }
+    }
+
+    // =========================================================================
+    // 8. HALAMAN TRANSAKSI & BOTTOM SHEET INPUT BERTINGKAT
+    // =========================================================================
+    function renderTransaksiPage(container) {
+      const monthTx = getTransactionsByPeriod(state.selectedYear, state.selectedMonth);
+      const q = state.txSearch.toLowerCase();
+      const filtered = monthTx.filter(function(tx) {
+        if (state.txJenis !== "ALL" && tx.Jenis !== state.txJenis) return false;
+        if (state.txDompet !== "ALL" && tx.ID_Dompet !== state.txDompet && tx.ID_Dompet_Tujuan !== state.txDompet) return false;
+        if (q) {
+          const hay = (tx.Sub_Kategori + " " + tx.Kategori_Utama + " " + tx.Catatan + " " + getWalletName(tx.ID_Dompet)).toLowerCase();
+          if (hay.indexOf(q) === -1) return false;
+        }
+        return true;
+      }).sort(function(a, b) {
+        return String(b.Tanggal).localeCompare(String(a.Tanggal));
+      });
+
+      const listHtml = filtered.map(function(tx) {
+        const isIn = tx.Jenis === "Pemasukan";
+        const isTr = tx.Jenis === "Transfer";
+        const iconBg = isIn ? "bg-teal-100 text-teal-700" : (isTr ? "bg-sky-100 text-sky-700" : "bg-rose-100 text-rose-600");
+        const iconFa = isIn ? "fa-arrow-down" : (isTr ? "fa-right-left" : "fa-arrow-up");
+        const nomClass = isIn ? "text-teal-700" : (isTr ? "text-sky-700" : "text-rose-600");
+        const sign = isIn ? "+" : (isTr ? "" : "-");
+        const walletInfo = isTr
+          ? getWalletName(tx.ID_Dompet) + " -> " + getWalletName(tx.ID_Dompet_Tujuan)
+          : getWalletName(tx.ID_Dompet);
+
+        return '<div class="bg-white rounded-2xl p-3 border border-slate-200/80 shadow-2xs flex items-start gap-3">' +
+          '<div class="w-10 h-10 rounded-xl ' + iconBg + ' flex items-center justify-center shrink-0 mt-0.5">' +
+            '<i class="fa-solid ' + iconFa + ' text-sm"></i>' +
+          '</div>' +
+          '<div class="flex-1 min-w-0">' +
+            '<div class="flex items-start justify-between gap-2">' +
+              '<p class="text-xs font-extrabold text-slate-900 truncate">' + escapeHtml(tx.Sub_Kategori) + '</p>' +
+              '<p class="text-xs font-extrabold ' + nomClass + ' whitespace-nowrap">' + sign + formatRp(tx.Nominal) + '</p>' +
+            '</div>' +
+            '<div class="flex items-center flex-wrap gap-1.5 mt-0.5">' +
+              '<span class="text-[10px] font-semibold text-slate-500">' + escapeHtml(tx.Kategori_Utama) + '</span>' +
+              (tx.Jenis === "Pengeluaran" ? '<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-md border ' + getPosBadgeClass(tx.Pos_Budget) + '">' + escapeHtml(tx.Pos_Budget) + '</span>' : '') +
+            '</div>' +
+            (tx.Catatan ? '<p class="text-[11px] text-slate-500 mt-1 line-clamp-1">' + escapeHtml(tx.Catatan) + '</p>' : '') +
+            '<div class="flex items-center justify-between mt-2 pt-1.5 border-t border-slate-100">' +
+              '<span class="text-[10px] font-semibold text-slate-400"><i class="fa-regular fa-calendar mr-1"></i>' + formatDateIndo(tx.Tanggal) + ' &bull; ' + escapeHtml(walletInfo) + '</span>' +
+              '<div class="flex items-center gap-1.5">' +
+                '<button onclick="openTransaksiSheet(\'' + tx.ID_Transaksi + '\')" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 hover:text-teal-700 flex items-center justify-center"><i class="fa-solid fa-pen text-[10px]"></i></button>' +
+                '<button onclick="confirmDeleteTx(\'' + tx.ID_Transaksi + '\')" class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center"><i class="fa-solid fa-trash text-[10px]"></i></button>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+        '</div>';
+      }).join("");
+
+      container.innerHTML =
+        '<div class="space-y-3">' +
+          '<div class="flex items-center justify-between">' +
+            '<div><h2 class="text-base font-extrabold text-slate-900">Riwayat Transaksi</h2><p class="text-[11px] text-slate-500">' + filtered.length + ' transaksi ditampilkan</p></div>' +
+            '<button onclick="openTransaksiSheet()" class="px-3.5 py-2 rounded-xl bg-teal-700 text-white text-xs font-extrabold shadow-sm active:scale-95 transition"><i class="fa-solid fa-plus mr-1"></i>Catat</button>' +
+          '</div>' +
+
+          // Filter Bar
+          '<div class="bg-white rounded-2xl p-3 border border-slate-200/80 space-y-2">' +
+            '<div class="relative">' +
+              '<i class="fa-solid fa-magnifying-glass text-slate-400 text-xs absolute left-3 top-1/2 -translate-y-1/2"></i>' +
+              '<input type="text" value="' + escapeHtml(state.txSearch) + '" oninput="state.txSearch=this.value;renderCurrentPage()" placeholder="Cari sub kategori, catatan, dompet..." class="w-full min-h-[38px] pl-8 pr-3 rounded-xl bg-slate-100 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500" />' +
+            '</div>' +
+            '<div class="grid grid-cols-2 gap-2">' +
+              '<select onchange="state.txJenis=this.value;renderCurrentPage()" class="min-h-[36px] px-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 bg-white">' +
+                '<option value="ALL"' + (state.txJenis === "ALL" ? " selected" : "") + '>Semua Jenis</option>' +
+                '<option value="Pengeluaran"' + (state.txJenis === "Pengeluaran" ? " selected" : "") + '>Pengeluaran</option>' +
+                '<option value="Pemasukan"' + (state.txJenis === "Pemasukan" ? " selected" : "") + '>Pemasukan</option>' +
+                '<option value="Transfer"' + (state.txJenis === "Transfer" ? " selected" : "") + '>Transfer</option>' +
+              '</select>' +
+              '<select onchange="state.txDompet=this.value;renderCurrentPage()" class="min-h-[36px] px-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 bg-white">' +
+                '<option value="ALL">Semua Dompet</option>' +
+                state.data.dompet.map(function(w) {
+                  return '<option value="' + w.ID_Dompet + '"' + (state.txDompet === w.ID_Dompet ? " selected" : "") + '>' + escapeHtml(w.Nama_Dompet) + '</option>';
+                }).join("") +
+              '</select>' +
+            '</div>' +
+          '</div>' +
+
+          // Daftar Transaksi
+          '<div class="space-y-2.5">' +
+            (listHtml || '<div class="bg-white rounded-2xl p-8 text-center border border-slate-200/80"><i class="fa-solid fa-receipt text-3xl text-slate-300 mb-2"></i><p class="text-xs font-bold text-slate-500">Belum ada transaksi di periode ini</p></div>') +
+          '</div>' +
+        '</div>';
+    }
+
+    function openTransaksiSheet(editId) {
+      const tx = editId ? state.data.transaksi.find(function(x) { return x.ID_Transaksi === editId; }) : null;
+      const jenis = tx ? tx.Jenis : "Pengeluaran";
+      const defaultDate = tx ? tx.Tanggal : (state.selectedYear + "-" + pad2(state.selectedMonth + 1) + "-" + pad2(Math.min(nowDate.getDate(), new Date(state.selectedYear, state.selectedMonth + 1, 0).getDate())));
+
+      const walletOpts = function(selId) {
+        return state.data.dompet.map(function(w) {
+          return '<option value="' + w.ID_Dompet + '"' + (w.ID_Dompet === selId ? " selected" : "") + '>' + escapeHtml(w.Nama_Dompet) + '</option>';
+        }).join("");
+      };
+
+      openSheet(tx ? "Edit Transaksi" : "Catat Transaksi Baru",
+        '<form id="form-transaksi" onsubmit="submitTransaksi(event, \'' + (editId || "") + '\')" class="space-y-3.5">' +
+          '<div class="grid grid-cols-3 gap-1.5 bg-slate-100 p-1 rounded-xl">' +
+            ["Pengeluaran", "Pemasukan", "Transfer"].map(function(j) {
+              return '<label class="cursor-pointer">' +
+                '<input type="radio" name="jenis" value="' + j + '"' + (jenis === j ? " checked" : "") + ' onchange="onTxJenisChange()" class="peer hidden" />' +
+                '<div class="py-2 text-center rounded-lg text-[11px] font-extrabold text-slate-600 peer-checked:bg-white peer-checked:text-teal-700 peer-checked:shadow-xs transition">' + j + '</div>' +
+              '</label>';
+            }).join("") +
+          '</div>' +
+
+          '<div class="grid grid-cols-2 gap-2.5">' +
+            '<div>' +
+              '<label class="block text-[11px] font-bold text-slate-600 mb-1">Tanggal</label>' +
+              '<input type="date" id="tx-tanggal" required value="' + defaultDate + '" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-semibold" />' +
+            '</div>' +
+            '<div>' +
+              '<label class="block text-[11px] font-bold text-slate-600 mb-1">Nominal (Rp)</label>' +
+              '<input type="text" inputmode="numeric" id="tx-nominal" required oninput="formatNominalInput(this)" value="' + (tx ? formatNumberComma(tx.Nominal) : "") + '" placeholder="150,000" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-sm font-extrabold" />' +
+            '</div>' +
+          '</div>' +
+
+          '<div id="tx-kat-wrapper" class="space-y-2.5">' +
+            '<div>' +
+              '<label class="block text-[11px] font-bold text-slate-600 mb-1">Kategori Utama</label>' +
+              '<select id="tx-kat-utama" onchange="onTxMainCatChange()" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-bold bg-white"></select>' +
+            '</div>' +
+            '<div>' +
+              '<label class="block text-[11px] font-bold text-slate-600 mb-1">Sub Kategori</label>' +
+              '<select id="tx-sub-kat" onchange="onTxSubCatChange()" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-bold bg-white"></select>' +
+            '</div>' +
+            '<div id="tx-pos-wrapper" class="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-xl px-3 py-2">' +
+              '<span class="text-[11px] font-bold text-slate-600">Pos Budgeting 50/30/20</span>' +
+              '<div class="flex items-center gap-2">' +
+                '<span id="tx-pos-badge" class="text-[10px] font-extrabold px-2 py-0.5 rounded-md border">Kebutuhan</span>' +
+                '<select id="tx-pos-budget" onchange="updatePosBadgePreview()" class="text-xs font-bold bg-white border border-slate-200 rounded-lg px-2 py-1">' +
+                  '<option value="Kebutuhan">Kebutuhan</option>' +
+                  '<option value="Keinginan">Keinginan</option>' +
+                  '<option value="Investasi">Investasi</option>' +
+                '</select>' +
+              '</div>' +
+            '</div>' +
+          '</div>' +
+
+          '<div class="grid grid-cols-1 gap-2.5">' +
+            '<div>' +
+              '<label id="tx-dompet-label" class="block text-[11px] font-bold text-slate-600 mb-1">Dompet / Rekening</label>' +
+              '<select id="tx-dompet" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-bold bg-white">' + walletOpts(tx ? tx.ID_Dompet : "") + '</select>' +
+            '</div>' +
+            '<div id="tx-dompet-tujuan-wrap" class="hidden">' +
+              '<label class="block text-[11px] font-bold text-slate-600 mb-1">Dompet Tujuan</label>' +
+              '<select id="tx-dompet-tujuan" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-bold bg-white">' + walletOpts(tx ? tx.ID_Dompet_Tujuan : (state.data.dompet[1] ? state.data.dompet[1].ID_Dompet : "")) + '</select>' +
+            '</div>' +
+          '</div>' +
+
+          '<div>' +
+            '<label class="block text-[11px] font-bold text-slate-600 mb-1">Catatan (Opsional)</label>' +
+            '<input type="text" id="tx-catatan" value="' + (tx ? escapeHtml(tx.Catatan) : "") + '" placeholder="Contoh: Belanja sayur di pasar..." class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs" />' +
+          '</div>' +
+
+          '<button type="submit" class="w-full min-h-[46px] rounded-xl bg-teal-700 hover:bg-teal-800 active:scale-[0.98] text-white text-sm font-extrabold shadow-md transition">Simpan Transaksi</button>' +
+        '</form>'
+      );
+
+      onTxJenisChange(tx);
+    }
+
+    function onTxJenisChange(txPreset) {
+      const checked = document.querySelector('#form-transaksi input[name="jenis"]:checked');
+      if (!checked) return;
+      const jenis = checked.value;
+      const katWrap = document.getElementById("tx-kat-wrapper");
+      const posWrap = document.getElementById("tx-pos-wrapper");
+      const dstWrap = document.getElementById("tx-dompet-tujuan-wrap");
+      const srcLabel = document.getElementById("tx-dompet-label");
+
+      if (jenis === "Transfer") {
+        katWrap.classList.add("hidden");
+        dstWrap.classList.remove("hidden");
+        srcLabel.textContent = "Dompet Asal";
+        return;
+      }
+
+      katWrap.classList.remove("hidden");
+      dstWrap.classList.add("hidden");
+      srcLabel.textContent = "Dompet / Rekening";
+      posWrap.classList.toggle("hidden", jenis !== "Pengeluaran");
+
+      const listKat = state.data.kategori.filter(function(k) { return k.Jenis === jenis; });
+      const uniqueMain = Array.from(new Set(listKat.map(function(k) { return k.Kategori_Utama; })));
+      const mainSel = document.getElementById("tx-kat-utama");
+      mainSel.innerHTML = uniqueMain.map(function(m) {
+        return '<option value="' + escapeHtml(m) + '">' + escapeHtml(m) + '</option>';
+      }).join("");
+
+      if (txPreset && txPreset.Kategori_Utama && uniqueMain.indexOf(txPreset.Kategori_Utama) >= 0) {
+        mainSel.value = txPreset.Kategori_Utama;
+      }
+      onTxMainCatChange(txPreset);
+    }
+
+    function onTxMainCatChange(txPreset) {
+      const checked = document.querySelector('#form-transaksi input[name="jenis"]:checked');
+      if (!checked || checked.value === "Transfer") return;
+      const jenis = checked.value;
+      const mainCat = document.getElementById("tx-kat-utama").value;
+      const subs = state.data.kategori.filter(function(k) {
+        return k.Jenis === jenis && k.Kategori_Utama === mainCat;
+      });
+      const subSel = document.getElementById("tx-sub-kat");
+      subSel.innerHTML = subs.map(function(s) {
+        return '<option value="' + escapeHtml(s.Sub_Kategori) + '">' + escapeHtml(s.Sub_Kategori) + '</option>';
+      }).join("");
+
+      if (txPreset && txPreset.Sub_Kategori) {
+        subSel.value = txPreset.Sub_Kategori;
+      }
+      onTxSubCatChange(txPreset);
+    }
+
+    function onTxSubCatChange(txPreset) {
+      const checked = document.querySelector('#form-transaksi input[name="jenis"]:checked');
+      if (!checked || checked.value !== "Pengeluaran") return;
+      const mainCat = document.getElementById("tx-kat-utama").value;
+      const subCat = document.getElementById("tx-sub-kat").value;
+      const found = state.data.kategori.find(function(k) {
+        return k.Jenis === "Pengeluaran" && k.Kategori_Utama === mainCat && k.Sub_Kategori === subCat;
+      });
+      const posSel = document.getElementById("tx-pos-budget");
+      if (txPreset && txPreset.Pos_Budget && txPreset.Pos_Budget !== "-") {
+        posSel.value = txPreset.Pos_Budget;
+      } else if (found && found.Pos_Budget && found.Pos_Budget !== "-") {
+        posSel.value = found.Pos_Budget;
+      }
+      updatePosBadgePreview();
+    }
+
+    function updatePosBadgePreview() {
+      const posSel = document.getElementById("tx-pos-budget");
+      const badge = document.getElementById("tx-pos-badge");
+      if (!posSel || !badge) return;
+      badge.textContent = posSel.value;
+      badge.className = "text-[10px] font-extrabold px-2 py-0.5 rounded-md border " + getPosBadgeClass(posSel.value);
+    }
+
+    async function submitTransaksi(e, editId) {
+      e.preventDefault();
+      const jenis = document.querySelector('#form-transaksi input[name="jenis"]:checked').value;
+      const dompetAsal = document.getElementById("tx-dompet").value;
+      const dompetTujuan = jenis === "Transfer" ? document.getElementById("tx-dompet-tujuan").value : "";
+      const nominalVal = parseNominal(document.getElementById("tx-nominal").value);
+      if (nominalVal <= 0) {
+        showToast("Nominal harus lebih dari 0", "warning");
+        return;
+      }
+      if (jenis === "Transfer" && dompetAsal === dompetTujuan) {
+        showToast("Dompet asal dan tujuan tidak boleh sama", "warning");
+        return;
+      }
+
+      const payload = {
+        ID_Transaksi: editId || undefined,
+        Tanggal: document.getElementById("tx-tanggal").value,
+        Jenis: jenis,
+        Kategori_Utama: jenis === "Transfer" ? "Transfer" : document.getElementById("tx-kat-utama").value,
+        Sub_Kategori: jenis === "Transfer" ? "Pindah Saldo" : document.getElementById("tx-sub-kat").value,
+        Pos_Budget: jenis === "Pengeluaran" ? document.getElementById("tx-pos-budget").value : "-",
+        ID_Dompet: dompetAsal,
+        ID_Dompet_Tujuan: dompetTujuan,
+        Nominal: nominalVal,
+        Catatan: document.getElementById("tx-catatan").value.trim(),
+        Dicatat_Oleh: "Keluarga Abu Syauqi"
+      };
+
+      const res = await apiCall("saveTransaction", payload);
+      if (res.success) {
+        closeSheet();
+        showToast(editId ? "Transaksi diperbarui" : "Transaksi berhasil dicatat", "success");
+        if (!IS_PREVIEW) await refreshAllData(true);
+        else renderCurrentPage();
+      }
+    }
+
+    function confirmDeleteTx(id) {
+      showConfirm("Hapus Transaksi", "Data transaksi yang dihapus tidak dapat dikembalikan. Lanjutkan?", async function() {
+        const res = await apiCall("deleteTransaction", { ID_Transaksi: id });
+        if (res.success) {
+          showToast("Transaksi dihapus", "info");
+          if (!IS_PREVIEW) await refreshAllData(true);
+          else renderCurrentPage();
+        }
+      });
+    }
+
+    // =========================================================================
+    // 9. HALAMAN ANGGARAN (BUDGETING 50/30/20)
+    // =========================================================================
+    function renderAnggaranPage(container) {
+      const key = getBulanTahunKey(state.selectedYear, state.selectedMonth);
+      const t = getTargetBulanan(state.selectedYear, state.selectedMonth);
+      const cur = computeMonthMetrics(state.selectedYear, state.selectedMonth);
+      const targetNom = t ? (Number(t.Target_Pengeluaran) || 0) : 0;
+      const pKeb = t ? (Number(t.Persen_Kebutuhan) || 50) : 50;
+      const pKei = t ? (Number(t.Persen_Keinginan) || 30) : 30;
+      const pInv = t ? (Number(t.Persen_Investasi) || 20) : 20;
+
+      const items = [
+        { name: "Kebutuhan", pct: pKeb, real: cur.posTotal.Kebutuhan, color: "bg-rose-500", text: "text-rose-700" },
+        { name: "Keinginan", pct: pKei, real: cur.posTotal.Keinginan, color: "bg-amber-500", text: "text-amber-700" },
+        { name: "Investasi", pct: pInv, real: cur.posTotal.Investasi, color: "bg-teal-600", text: "text-teal-700" }
+      ];
+
+      container.innerHTML =
+        '<div class="space-y-3.5">' +
+          '<div><h2 class="text-base font-extrabold text-slate-900">Anggaran 50/30/20</h2><p class="text-[11px] text-slate-500">Periode ' + BULAN_LIST[state.selectedMonth] + ' ' + state.selectedYear + '</p></div>' +
+
+          '<div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs">' +
+            '<form onsubmit="submitTargetForm(event, \'' + key + '\', false)" class="space-y-3">' +
+              '<div>' +
+                '<label class="block text-[11px] font-bold text-slate-600 mb-1">Target Pengeluaran Bulanan (Rp)</label>' +
+                '<input type="text" inputmode="numeric" id="ang-target-nom" required oninput="formatNominalInput(this)" value="' + formatNumberComma(targetNom) + '" placeholder="10,000,000" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-sm font-extrabold" />' +
+              '</div>' +
+              '<div class="grid grid-cols-3 gap-2">' +
+                '<div><label class="block text-[10px] font-bold text-rose-700 mb-1">Kebutuhan (%)</label><input type="number" id="ang-pkeb" value="' + pKeb + '" min="0" max="100" class="w-full min-h-[40px] px-2.5 rounded-xl border border-slate-200 text-xs font-extrabold text-center" /></div>' +
+                '<div><label class="block text-[10px] font-bold text-amber-700 mb-1">Keinginan (%)</label><input type="number" id="ang-pkei" value="' + pKei + '" min="0" max="100" class="w-full min-h-[40px] px-2.5 rounded-xl border border-slate-200 text-xs font-extrabold text-center" /></div>' +
+                '<div><label class="block text-[10px] font-bold text-teal-700 mb-1">Investasi (%)</label><input type="number" id="ang-pinv" value="' + pInv + '" min="0" max="100" class="w-full min-h-[40px] px-2.5 rounded-xl border border-slate-200 text-xs font-extrabold text-center" /></div>' +
+              '</div>' +
+              '<button type="submit" class="w-full min-h-[44px] rounded-xl bg-teal-700 text-white text-xs font-extrabold shadow-sm active:scale-[0.98] transition">Simpan Target Anggaran</button>' +
+            '</form>' +
+          '</div>' +
+
+          '<div class="space-y-2.5">' +
+            items.map(function(it) {
+              const limit = Math.round(targetNom * (it.pct / 100));
+              const usedPct = limit > 0 ? Math.round((it.real / limit) * 100) : 0;
+              const over = limit > 0 && it.real > limit;
+              return '<div class="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-xs">' +
+                '<div class="flex items-center justify-between mb-1.5">' +
+                  '<span class="text-xs font-extrabold ' + it.text + '">' + it.name + ' (' + it.pct + '%)</span>' +
+                  '<span class="text-[11px] font-extrabold ' + (over ? 'text-rose-600' : 'text-slate-700') + '">' + usedPct + '% terpakai</span>' +
+                '</div>' +
+                '<div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden mb-2">' +
+                  '<div class="h-full ' + (over ? 'bg-rose-600' : it.color) + ' rounded-full" style="width:' + Math.min(100, usedPct) + '%"></div>' +
+                '</div>' +
+                '<div class="flex justify-between text-[11px] text-slate-500">' +
+                  '<span>Realisasi: <b class="text-slate-900">' + formatRp(it.real) + '</b></span>' +
+                  '<span>Batas: <b class="text-slate-800">' + formatRp(limit) + '</b></span>' +
+                '</div>' +
+              '</div>';
+            }).join("") +
+          '</div>' +
+        '</div>';
+    }
+
+    function openTargetSheet() {
+      const key = getBulanTahunKey(state.selectedYear, state.selectedMonth);
+      const t = getTargetBulanan(state.selectedYear, state.selectedMonth);
+      openSheet("Target " + BULAN_LIST[state.selectedMonth] + " " + state.selectedYear,
+        '<form onsubmit="submitTargetForm(event, \'' + key + '\', true)" class="space-y-3.5">' +
+          '<div>' +
+            '<label class="block text-[11px] font-bold text-slate-600 mb-1">Total Target Pengeluaran (Rp)</label>' +
+            '<input type="text" inputmode="numeric" id="ang-target-nom" required oninput="formatNominalInput(this)" value="' + formatNumberComma(t ? t.Target_Pengeluaran : 10000000) + '" placeholder="10,000,000" class="w-full min-h-[44px] px-3 rounded-xl border border-slate-200 text-sm font-extrabold" />' +
+          '</div>' +
+          '<div class="grid grid-cols-3 gap-2">' +
+            '<div><label class="block text-[10px] font-bold text-rose-700 mb-1">Kebutuhan %</label><input type="number" id="ang-pkeb" value="' + (t ? t.Persen_Kebutuhan : 50) + '" class="w-full min-h-[40px] px-2 rounded-xl border border-slate-200 text-xs font-extrabold text-center" /></div>' +
+            '<div><label class="block text-[10px] font-bold text-amber-700 mb-1">Keinginan %</label><input type="number" id="ang-pkei" value="' + (t ? t.Persen_Keinginan : 30) + '" class="w-full min-h-[40px] px-2 rounded-xl border border-slate-200 text-xs font-extrabold text-center" /></div>' +
+            '<div><label class="block text-[10px] font-bold text-teal-700 mb-1">Investasi %</label><input type="number" id="ang-pinv" value="' + (t ? t.Persen_Investasi : 20) + '" class="w-full min-h-[40px] px-2 rounded-xl border border-slate-200 text-xs font-extrabold text-center" /></div>' +
+          '</div>' +
+          '<button type="submit" class="w-full min-h-[46px] rounded-xl bg-teal-700 text-white text-sm font-extrabold">Simpan Target</button>' +
+        '</form>'
+      );
+    }
+
+    async function submitTargetForm(e, key, fromSheet) {
+      e.preventDefault();
+      const nom = parseNominal(document.getElementById("ang-target-nom").value);
+      const pkeb = Number(document.getElementById("ang-pkeb").value) || 0;
+      const pkei = Number(document.getElementById("ang-pkei").value) || 0;
+      const pinv = Number(document.getElementById("ang-pinv").value) || 0;
+      if (pkeb + pkei + pinv !== 100) {
+        showToast("Total persentase Kebutuhan + Keinginan + Investasi harus 100%", "warning");
+        return;
+      }
+      const res = await apiCall("saveBudgetTarget", {
+        Bulan_Tahun: key,
+        Target_Pengeluaran: nom,
+        Persen_Kebutuhan: pkeb,
+        Persen_Keinginan: pkei,
+        Persen_Investasi: pinv
+      });
+      if (res.success) {
+        if (fromSheet) closeSheet();
+        showToast("Target anggaran berhasil disimpan", "success");
+        if (!IS_PREVIEW) await refreshAllData(true);
+        else renderCurrentPage();
+      }
+    }
+
+    // =========================================================================
+    // 10. MENU LAINNYA + DOMPET, TABUNGAN, TAGIHAN, LAPORAN, MASTER KATEGORI
+    // =========================================================================
+    function renderLainnyaPage(container) {
+      const totalSaldoSemua = state.data.dompet.reduce(function(s, w) { return s + getWalletBalance(w.ID_Dompet); }, 0);
+      const unpaidBills = state.data.tagihan.filter(function(b) { return b.Status !== "Lunas"; }).length;
+
+      const cards = [
+        { id: "dompet", icon: "fa-wallet", color: "bg-teal-100 text-teal-700", title: "Dompet & Rekening", desc: state.data.dompet.length + " akun • " + formatShortRp(totalSaldoSemua) },
+        { id: "tabungan", icon: "fa-bullseye", color: "bg-purple-100 text-purple-700", title: "Target Tabungan", desc: state.data.targetTabungan.length + " target impian" },
+        { id: "tagihan", icon: "fa-file-invoice-dollar", color: "bg-rose-100 text-rose-600", title: "Tagihan & Kewajiban", desc: unpaidBills + " belum lunas" },
+        { id: "laporan", icon: "fa-file-export", color: "bg-sky-100 text-sky-700", title: "Laporan & Ekspor", desc: "CSV & Cetak PDF" },
+        { id: "pengaturan", icon: "fa-tags", color: "bg-amber-100 text-amber-700", title: "Master Kategori", desc: state.data.kategori.length + " sub kategori aktif" }
+      ];
+
+      container.innerHTML =
+        '<div class="space-y-3">' +
+          '<div><h2 class="text-base font-extrabold text-slate-900">Menu Lainnya</h2><p class="text-[11px] text-slate-500">Kelola aset, target, tagihan & pengaturan</p></div>' +
+          '<div class="space-y-2.5">' +
+            cards.map(function(c) {
+              return '<button onclick="navigateTo(\'' + c.id + '\')" class="w-full bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-2xs flex items-center gap-3.5 active:scale-[0.98] transition text-left">' +
+                '<div class="w-11 h-11 rounded-xl ' + c.color + ' flex items-center justify-center text-lg shrink-0"><i class="fa-solid ' + c.icon + '"></i></div>' +
+                '<div class="flex-1 min-w-0">' +
+                  '<p class="text-sm font-extrabold text-slate-900">' + c.title + '</p>' +
+                  '<p class="text-[11px] font-semibold text-slate-500">' + c.desc + '</p>' +
+                '</div>' +
+                '<i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>' +
+              '</button>';
+            }).join("") +
+          '</div>' +
+        '</div>';
+    }
+
+    function subPageHeader(title, btnText, btnAction) {
+      return '<div class="flex items-center justify-between gap-2 mb-3">' +
+        '<div class="flex items-center gap-2">' +
+          '<button onclick="navigateTo(\'lainnya\')" class="w-9 h-9 rounded-xl bg-white border border-slate-200 text-slate-600 flex items-center justify-center active:scale-95 transition"><i class="fa-solid fa-arrow-left text-xs"></i></button>' +
+          '<h2 class="text-base font-extrabold text-slate-900">' + title + '</h2>' +
+        '</div>' +
+        (btnText ? '<button onclick="' + btnAction + '" class="px-3 py-2 rounded-xl bg-teal-700 text-white text-xs font-extrabold active:scale-95 transition"><i class="fa-solid fa-plus mr-1"></i>' + btnText + '</button>' : '') +
+      '</div>';
+    }
+
+    // --- DOMPET ---
+    function renderDompetPage(container) {
+      const total = state.data.dompet.reduce(function(s, w) { return s + getWalletBalance(w.ID_Dompet); }, 0);
+      container.innerHTML =
+        subPageHeader("Dompet & Rekening", "Dompet", "openDompetSheet()") +
+        '<div class="bg-gradient-to-br from-teal-700 to-emerald-600 text-white rounded-2xl p-4 mb-3 shadow-sm">' +
+          '<p class="text-[11px] font-bold text-teal-100">Total Kekayaan Likuid</p>' +
+          '<p class="text-2xl font-extrabold mt-0.5">' + formatRp(total) + '</p>' +
+        '</div>' +
+        '<div class="space-y-2.5">' +
+          state.data.dompet.map(function(w) {
+            const bal = getWalletBalance(w.ID_Dompet);
+            return '<div class="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-2xs flex items-center justify-between gap-3">' +
+              '<div class="min-w-0">' +
+                '<span class="text-[9px] font-extrabold uppercase px-2 py-0.5 rounded-md bg-slate-100 text-slate-600">' + escapeHtml(w.Tipe) + '</span>' +
+                '<p class="text-sm font-extrabold text-slate-900 mt-1 truncate">' + escapeHtml(w.Nama_Dompet) + '</p>' +
+                '<p class="text-xs font-extrabold text-teal-700 mt-0.5">' + formatRp(bal) + '</p>' +
+              '</div>' +
+              '<div class="flex items-center gap-1.5 shrink-0">' +
+                '<button onclick="openDompetSheet(\'' + w.ID_Dompet + '\')" class="w-8 h-8 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center"><i class="fa-solid fa-pen text-xs"></i></button>' +
+                '<button onclick="confirmDeleteDompet(\'' + w.ID_Dompet + '\')" class="w-8 h-8 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center"><i class="fa-solid fa-trash text-xs"></i></button>' +
+              '</div>' +
+            '</div>';
+          }).join("") +
+        '</div>';
+    }
+
+    function openDompetSheet(editId) {
+      const d = editId ? state.data.dompet.find(function(x) { return x.ID_Dompet === editId; }) : null;
+      openSheet(d ? "Edit Dompet" : "Tambah Dompet",
+        '<form onsubmit="submitDompet(event, \'' + (editId || "") + '\')" class="space-y-3">' +
+          '<div><label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Dompet / Rekening</label><input type="text" id="dmp-nama" required value="' + (d ? escapeHtml(d.Nama_Dompet) : "") + '" placeholder="Contoh: Bank BSI" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-bold" /></div>' +
+          '<div class="grid grid-cols-2 gap-2.5">' +
+            '<div><label class="block text-[11px] font-bold text-slate-600 mb-1">Tipe</label><select id="dmp-tipe" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-bold bg-white">' +
+              ["Bank", "Tunai", "E-Wallet", "Investasi"].map(function(tp) { return '<option value="' + tp + '"' + (d && d.Tipe === tp ? " selected" : "") + '>' + tp + '</option>'; }).join("") +
+            '</select></div>' +
+            '<div><label class="block text-[11px] font-bold text-slate-600 mb-1">Saldo Awal (Rp)</label><input type="text" inputmode="numeric" id="dmp-saldo" required oninput="formatNominalInput(this)" value="' + formatNumberComma(d ? d.Saldo_Awal : 0) + '" placeholder="0" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-extrabold" /></div>' +
+          '</div>' +
+          '<div><label class="block text-[11px] font-bold text-slate-600 mb-1">Keterangan</label><input type="text" id="dmp-ket" value="' + (d ? escapeHtml(d.Keterangan) : "") + '" placeholder="Opsional..." class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs" /></div>' +
+          '<button type="submit" class="w-full min-h-[46px] rounded-xl bg-teal-700 text-white text-sm font-extrabold">Simpan Dompet</button>' +
+        '</form>'
+      );
+    }
+
+    async function submitDompet(e, editId) {
+      e.preventDefault();
+      const res = await apiCall("saveWallet", {
+        ID_Dompet: editId || undefined,
+        Nama_Dompet: document.getElementById("dmp-nama").value.trim(),
+        Tipe: document.getElementById("dmp-tipe").value,
+        Saldo_Awal: parseNominal(document.getElementById("dmp-saldo").value),
+        Keterangan: document.getElementById("dmp-ket").value.trim()
+      });
+      if (res.success) {
+        closeSheet();
+        showToast("Dompet tersimpan", "success");
+        if (!IS_PREVIEW) await refreshAllData(true);
+        else renderCurrentPage();
+      }
+    }
+
+    function confirmDeleteDompet(id) {
+      showConfirm("Hapus Dompet", "Yakin ingin menghapus dompet ini?", async function() {
+        const res = await apiCall("deleteWallet", { ID_Dompet: id });
+        if (res.success) {
+          showToast("Dompet dihapus", "info");
+          if (!IS_PREVIEW) await refreshAllData(true);
+          else renderCurrentPage();
+        }
+      });
+    }
+
+    // --- TARGET TABUNGAN ---
+    function renderTabunganPage(container) {
+      container.innerHTML =
+        subPageHeader("Target Tabungan", "Target", "openTabunganSheet()") +
+        '<div class="space-y-2.5">' +
+          state.data.targetTabungan.map(function(g) {
+            const pct = g.Target_Nominal > 0 ? Math.min(100, Math.round((g.Terkumpul / g.Target_Nominal) * 100)) : 0;
+            return '<div class="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-2xs space-y-2">' +
+              '<div class="flex items-start justify-between gap-2">' +
+                '<div><p class="text-sm font-extrabold text-slate-900">' + escapeHtml(g.Nama_Target) + '</p><p class="text-[10px] font-semibold text-slate-400">Tenggat: ' + formatDateIndo(g.Tenggat_Waktu) + '</p></div>' +
+                '<span class="px-2 py-0.5 rounded-lg text-[10px] font-extrabold ' + (pct >= 100 ? 'bg-emerald-100 text-emerald-700' : 'bg-purple-100 text-purple-700') + '">' + pct + '%</span>' +
+              '</div>' +
+              '<div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-purple-600 rounded-full" style="width:' + pct + '%"></div></div>' +
+              '<div class="flex items-center justify-between text-[11px]">' +
+                '<span class="font-bold text-slate-700">' + formatRp(g.Terkumpul) + ' <span class="text-slate-400 font-normal">/ ' + formatRp(g.Target_Nominal) + '</span></span>' +
+                '<div class="flex items-center gap-1.5">' +
+                  '<button onclick="openSetorSheet(\'' + g.ID_Target + '\')" class="px-2.5 py-1 rounded-lg bg-teal-700 text-white text-[10px] font-extrabold">+ Setor</button>' +
+                  '<button onclick="openTabunganSheet(\'' + g.ID_Target + '\')" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center"><i class="fa-solid fa-pen text-[10px]"></i></button>' +
+                  '<button onclick="confirmDeleteGoal(\'' + g.ID_Target + '\')" class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center"><i class="fa-solid fa-trash text-[10px]"></i></button>' +
+                '</div>' +
+              '</div>' +
+            '</div>';
+          }).join("") +
+        '</div>';
+    }
+
+    function openTabunganSheet(editId) {
+      const g = editId ? state.data.targetTabungan.find(function(x) { return x.ID_Target === editId; }) : null;
+      openSheet(g ? "Edit Target Tabungan" : "Target Tabungan Baru",
+        '<form onsubmit="submitTabungan(event, \'' + (editId || "") + '\')" class="space-y-3">' +
+          '<div><label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Target</label><input type="text" id="gl-nama" required value="' + (g ? escapeHtml(g.Nama_Target) : "") + '" placeholder="Contoh: Dana Kurban" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-bold" /></div>' +
+          '<div class="grid grid-cols-2 gap-2.5">' +
+            '<div><label class="block text-[11px] font-bold text-slate-600 mb-1">Target Nominal (Rp)</label><input type="text" inputmode="numeric" id="gl-target" required oninput="formatNominalInput(this)" value="' + (g ? formatNumberComma(g.Target_Nominal) : "") + '" placeholder="10,000,000" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-extrabold" /></div>' +
+            '<div><label class="block text-[11px] font-bold text-slate-600 mb-1">Terkumpul (Rp)</label><input type="text" inputmode="numeric" id="gl-terkumpul" required oninput="formatNominalInput(this)" value="' + formatNumberComma(g ? g.Terkumpul : 0) + '" placeholder="0" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-extrabold" /></div>' +
+          '</div>' +
+          '<div><label class="block text-[11px] font-bold text-slate-600 mb-1">Tenggat Waktu</label><input type="date" id="gl-tenggat" required value="' + (g ? g.Tenggat_Waktu : "") + '" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-semibold" /></div>' +
+          '<button type="submit" class="w-full min-h-[46px] rounded-xl bg-teal-700 text-white text-sm font-extrabold">Simpan Target</button>' +
+        '</form>'
+      );
+    }
+
+    async function submitTabungan(e, editId) {
+      e.preventDefault();
+      const target = parseNominal(document.getElementById("gl-target").value);
+      const terkumpul = parseNominal(document.getElementById("gl-terkumpul").value);
+      if (target <= 0) {
+        showToast("Target nominal harus lebih dari 0", "warning");
+        return;
+      }
+      const res = await apiCall("saveGoal", {
+        ID_Target: editId || undefined,
+        Nama_Target: document.getElementById("gl-nama").value.trim(),
+        Target_Nominal: target,
+        Terkumpul: terkumpul,
+        Tenggat_Waktu: document.getElementById("gl-tenggat").value,
+        Status: terkumpul >= target ? "Tercapai" : "Berjalan"
+      });
+      if (res.success) {
+        closeSheet();
+        showToast("Target tabungan disimpan", "success");
+        if (!IS_PREVIEW) await refreshAllData(true);
+        else renderCurrentPage();
+      }
+    }
+
+    function openSetorSheet(id) {
+      const g = state.data.targetTabungan.find(function(x) { return x.ID_Target === id; });
+      if (!g) return;
+      openSheet("Setor ke " + g.Nama_Target,
+        '<form onsubmit="submitSetorTabungan(event, \'' + id + '\')" class="space-y-3">' +
+          '<div><label class="block text-[11px] font-bold text-slate-600 mb-1">Nominal Setoran (Rp)</label><input type="text" inputmode="numeric" id="gl-setor-nom" required oninput="formatNominalInput(this)" placeholder="500,000" class="w-full min-h-[44px] px-3 rounded-xl border border-slate-200 text-sm font-extrabold" /></div>' +
+          '<label class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 border border-slate-200 cursor-pointer">' +
+            '<input type="checkbox" id="gl-catat-tx" checked class="w-4 h-4 accent-teal-700" />' +
+            '<span class="text-xs font-bold text-slate-700">Catat juga sebagai transaksi pengeluaran (Investasi)</span>' +
+          '</label>' +
+          '<div><label class="block text-[11px] font-bold text-slate-600 mb-1">Ambil dari Dompet</label><select id="gl-setor-dmp" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-bold bg-white">' +
+            state.data.dompet.map(function(w) { return '<option value="' + w.ID_Dompet + '">' + escapeHtml(w.Nama_Dompet) + '</option>'; }).join("") +
+          '</select></div>' +
+          '<button type="submit" class="w-full min-h-[46px] rounded-xl bg-teal-700 text-white text-sm font-extrabold">Proses Setoran</button>' +
+        '</form>'
+      );
+    }
+
+    async function submitSetorTabungan(e, id) {
+      e.preventDefault();
+      const addNom = parseNominal(document.getElementById("gl-setor-nom").value);
+      if (addNom <= 0) {
+        showToast("Nominal setoran harus lebih dari 0", "warning");
+        return;
+      }
+      const res = await apiCall("depositGoal", {
+        ID_Target: id,
+        Nominal: addNom,
+        catatTransaksi: document.getElementById("gl-catat-tx").checked,
+        ID_Dompet: document.getElementById("gl-setor-dmp").value
+      });
+      if (res.success) {
+        closeSheet();
+        showToast("Setoran berhasil ditambahkan", "success");
+        if (!IS_PREVIEW) await refreshAllData(true);
+        else renderCurrentPage();
+      }
+    }
+
+    function confirmDeleteGoal(id) {
+      showConfirm("Hapus Target", "Yakin ingin menghapus target tabungan ini?", async function() {
+        const res = await apiCall("deleteGoal", { ID_Target: id });
+        if (res.success) {
+          showToast("Target dihapus", "info");
+          if (!IS_PREVIEW) await refreshAllData(true);
+          else renderCurrentPage();
+        }
+      });
+    }
+
+    // --- TAGIHAN & KEWAJIBAN ---
+    function renderTagihanPage(container) {
+      container.innerHTML =
+        subPageHeader("Tagihan & Kewajiban", "Tagihan", "openTagihanSheet()") +
+        '<div class="space-y-2.5">' +
+          state.data.tagihan.map(function(b) {
+            const isLunas = b.Status === "Lunas";
+            return '<div class="bg-white rounded-2xl p-3.5 border border-slate-200/80 shadow-2xs flex items-center justify-between gap-2.5">' +
+              '<div class="min-w-0">' +
+                '<div class="flex items-center gap-1.5">' +
+                  '<span class="text-[9px] font-extrabold px-2 py-0.5 rounded-md ' + (isLunas ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700') + '">' + escapeHtml(b.Status) + '</span>' +
+                  '<span class="text-[10px] font-semibold text-slate-400">' + escapeHtml(b.Tipe) + '</span>' +
+                '</div>' +
+                '<p class="text-sm font-extrabold text-slate-900 mt-1 truncate">' + escapeHtml(b.Nama_Item) + '</p>' +
+                '<p class="text-xs font-extrabold text-slate-800">' + formatRp(b.Nominal) + ' <span class="text-[10px] font-normal text-slate-400">• JT ' + formatDateIndo(b.Jatuh_Tempo) + '</span></p>' +
+              '</div>' +
+              '<div class="flex items-center gap-1.5 shrink-0">' +
+                '<button onclick="toggleTagihanStatus(\'' + b.ID_Tagihan + '\')" class="px-2.5 py-1.5 rounded-lg text-[10px] font-extrabold ' + (isLunas ? 'bg-slate-100 text-slate-600' : 'bg-teal-700 text-white') + '">' + (isLunas ? 'Batal' : 'Lunas') + '</button>' +
+                '<button onclick="openTagihanSheet(\'' + b.ID_Tagihan + '\')" class="w-7 h-7 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center"><i class="fa-solid fa-pen text-[10px]"></i></button>' +
+                '<button onclick="confirmDeleteBill(\'' + b.ID_Tagihan + '\')" class="w-7 h-7 rounded-lg bg-rose-50 text-rose-600 flex items-center justify-center"><i class="fa-solid fa-trash text-[10px]"></i></button>' +
+              '</div>' +
+            '</div>';
+          }).join("") +
+        '</div>';
+    }
+
+    function openTagihanSheet(editId) {
+      const t = editId ? state.data.tagihan.find(function(x) { return x.ID_Tagihan === editId; }) : null;
+      openSheet(t ? "Edit Tagihan" : "Tambah Tagihan / Hutang",
+        '<form onsubmit="submitTagihan(event, \'' + (editId || "") + '\')" class="space-y-3">' +
+          '<div><label class="block text-[11px] font-bold text-slate-600 mb-1">Nama Tagihan / Kewajiban</label><input type="text" id="tgh-nama" required value="' + (t ? escapeHtml(t.Nama_Item) : "") + '" placeholder="Contoh: Listrik Bulanan" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-bold" /></div>' +
+          '<div class="grid grid-cols-2 gap-2.5">' +
+            '<div><label class="block text-[11px] font-bold text-slate-600 mb-1">Tipe</label><select id="tgh-tipe" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-bold bg-white">' +
+              ["Tagihan Rutin", "Hutang", "Piutang"].map(function(tp) { return '<option value="' + tp + '"' + (t && t.Tipe === tp ? " selected" : "") + '>' + tp + '</option>'; }).join("") +
+            '</select></div>' +
+            '<div><label class="block text-[11px] font-bold text-slate-600 mb-1">Nominal (Rp)</label><input type="text" inputmode="numeric" id="tgh-nom" required oninput="formatNominalInput(this)" value="' + (t ? formatNumberComma(t.Nominal) : "") + '" placeholder="250,000" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-extrabold" /></div>' +
+          '</div>' +
+          '<div class="grid grid-cols-2 gap-2.5">' +
+            '<div><label class="block text-[11px] font-bold text-slate-600 mb-1">Jatuh Tempo</label><input type="date" id="tgh-tempo" required value="' + (t ? t.Jatuh_Tempo : "") + '" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-semibold" /></div>' +
+            '<div><label class="block text-[11px] font-bold text-slate-600 mb-1">Status</label><select id="tgh-status" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-bold bg-white">' +
+              '<option value="Belum Lunas"' + (!t || t.Status === "Belum Lunas" ? " selected" : "") + '>Belum Lunas</option>' +
+              '<option value="Lunas"' + (t && t.Status === "Lunas" ? " selected" : "") + '>Lunas</option>' +
+            '</select></div>' +
+          '</div>' +
+          '<div><label class="block text-[11px] font-bold text-slate-600 mb-1">Catatan</label><input type="text" id="tgh-cat" value="' + (t ? escapeHtml(t.Catatan) : "") + '" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs" /></div>' +
+          '<button type="submit" class="w-full min-h-[46px] rounded-xl bg-teal-700 text-white text-sm font-extrabold">Simpan Tagihan</button>' +
+        '</form>'
+      );
+    }
+
+    async function submitTagihan(e, editId) {
+      e.preventDefault();
+      const nomVal = parseNominal(document.getElementById("tgh-nom").value);
+      if (nomVal <= 0) {
+        showToast("Nominal tagihan harus lebih dari 0", "warning");
+        return;
+      }
+      const res = await apiCall("saveBill", {
+        ID_Tagihan: editId || undefined,
+        Nama_Item: document.getElementById("tgh-nama").value.trim(),
+        Tipe: document.getElementById("tgh-tipe").value,
+        Nominal: nomVal,
+        Jatuh_Tempo: document.getElementById("tgh-tempo").value,
+        Status: document.getElementById("tgh-status").value,
+        Catatan: document.getElementById("tgh-cat").value.trim()
+      });
+      if (res.success) {
+        closeSheet();
+        showToast("Tagihan disimpan", "success");
+        if (!IS_PREVIEW) await refreshAllData(true);
+        else renderCurrentPage();
+      }
+    }
+
+    async function toggleTagihanStatus(id) {
+      const res = await apiCall("toggleBill", { ID_Tagihan: id });
+      if (res.success) {
+        showToast("Status tagihan diperbarui", "success");
+        if (!IS_PREVIEW) await refreshAllData(true);
+        else renderCurrentPage();
+      }
+    }
+
+    function confirmDeleteBill(id) {
+      showConfirm("Hapus Tagihan", "Yakin ingin menghapus item tagihan ini?", async function() {
+        const res = await apiCall("deleteBill", { ID_Tagihan: id });
+        if (res.success) {
+          showToast("Tagihan dihapus", "info");
+          if (!IS_PREVIEW) await refreshAllData(true);
+          else renderCurrentPage();
+        }
+      });
+    }
+
+    // --- LAPORAN & EKSPOR CSV / CETAK ---
+    function renderLaporanPage(container) {
+      const cur = computeMonthMetrics(state.selectedYear, state.selectedMonth);
+      container.innerHTML =
+        subPageHeader("Laporan Keuangan", "", "") +
+        '<div class="space-y-3">' +
+          '<div class="bg-white rounded-2xl p-4 border border-slate-200/80 shadow-xs space-y-2">' +
+            '<p class="text-xs font-extrabold text-slate-800">Ringkasan ' + BULAN_LIST[state.selectedMonth] + ' ' + state.selectedYear + '</p>' +
+            '<div class="flex justify-between text-xs"><span class="text-slate-500">Total Pemasukan</span><span class="font-extrabold text-teal-700">' + formatRp(cur.income) + '</span></div>' +
+            '<div class="flex justify-between text-xs"><span class="text-slate-500">Total Pengeluaran</span><span class="font-extrabold text-rose-600">' + formatRp(cur.expense) + '</span></div>' +
+            '<div class="flex justify-between text-xs pt-2 border-t border-slate-100"><span class="font-bold text-slate-700">Sisa Saldo</span><span class="font-extrabold text-purple-700">' + formatRp(cur.saldo) + '</span></div>' +
+          '</div>' +
+          '<div class="grid grid-cols-2 gap-2.5 no-print">' +
+            '<button onclick="exportMonthlyCSV()" class="min-h-[46px] rounded-xl bg-teal-700 text-white text-xs font-extrabold flex items-center justify-center gap-2 active:scale-95 transition"><i class="fa-solid fa-file-csv"></i>Ekspor CSV</button>' +
+            '<button onclick="window.print()" class="min-h-[46px] rounded-xl bg-slate-800 text-white text-xs font-extrabold flex items-center justify-center gap-2 active:scale-95 transition"><i class="fa-solid fa-print"></i>Cetak / PDF</button>' +
+          '</div>' +
+          '<div class="bg-white rounded-2xl p-3.5 border border-slate-200/80">' +
+            '<p class="text-xs font-extrabold text-slate-800 mb-2">Rincian Transaksi (' + cur.list.length + ')</p>' +
+            '<div class="space-y-1.5">' +
+              cur.list.map(function(tx) {
+                return '<div class="flex items-center justify-between text-[11px] py-1.5 border-b border-slate-100 last:border-0">' +
+                  '<div class="min-w-0 pr-2"><p class="font-bold text-slate-800 truncate">' + escapeHtml(tx.Sub_Kategori) + '</p><p class="text-[10px] text-slate-400">' + formatDateIndo(tx.Tanggal) + ' • ' + escapeHtml(tx.Kategori_Utama) + '</p></div>' +
+                  '<span class="font-extrabold whitespace-nowrap ' + (tx.Jenis === 'Pemasukan' ? 'text-teal-700' : 'text-rose-600') + '">' + formatRp(tx.Nominal) + '</span>' +
+                '</div>';
+              }).join("") +
+            '</div>' +
+          '</div>' +
+        '</div>';
+    }
+
+    function exportMonthlyCSV() {
+      const list = getTransactionsByPeriod(state.selectedYear, state.selectedMonth);
+      if (list.length === 0) {
+        showToast("Tidak ada transaksi untuk diekspor", "warning");
+        return;
+      }
+      const header = ["Tanggal", "Jenis", "Kategori Utama", "Sub Kategori", "Pos Budget", "Dompet", "Nominal", "Catatan"];
+      const rows = list.map(function(tx) {
+        return [
+          tx.Tanggal, tx.Jenis, tx.Kategori_Utama, tx.Sub_Kategori,
+          tx.Pos_Budget, getWalletName(tx.ID_Dompet), tx.Nominal, tx.Catatan || ""
+        ].map(function(v) { return '"' + String(v).replace(/"/g, '""') + '"'; }).join(",");
+      });
+      const csv = "\uFEFF" + header.join(",") + "\n" + rows.join("\n");
+      const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "Abu_Syauqi_Budgeting_" + getBulanTahunKey(state.selectedYear, state.selectedMonth) + ".csv";
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("File CSV berhasil diunduh", "success");
+    }
+
+    // --- PENGATURAN MASTER KATEGORI (79 KATEGORI BERKELOMPOK) ---
+    function renderPengaturanPage(container) {
+      const exCount = state.data.kategori.filter(function(k) { return k.Jenis === "Pengeluaran"; }).length;
+      const inCount = state.data.kategori.filter(function(k) { return k.Jenis === "Pemasukan"; }).length;
+      const q = state.katSearch.toLowerCase();
+
+      const filtered = state.data.kategori.filter(function(k) {
+        if (k.Jenis !== state.katTab) return false;
+        if (q && (k.Kategori_Utama + " " + k.Sub_Kategori + " " + k.Pos_Budget).toLowerCase().indexOf(q) === -1) return false;
+        return true;
+      });
+
+      const grouped = {};
+      filtered.forEach(function(k) {
+        if (!grouped[k.Kategori_Utama]) grouped[k.Kategori_Utama] = [];
+        grouped[k.Kategori_Utama].push(k);
+      });
+
+      const groupsHtml = Object.keys(grouped).map(function(mainName) {
+        const items = grouped[mainName];
+        const isClosed = !!state.katCollapsed[mainName];
+        return '<div class="bg-white rounded-2xl border border-slate-200/80 overflow-hidden shadow-2xs">' +
+          '<button onclick="toggleKatGroup(\'' + escapeHtml(mainName).replace(/'/g, "\\'") + '\')" class="w-full px-3.5 py-2.5 bg-slate-50/80 flex items-center justify-between text-left">' +
+            '<span class="text-xs font-extrabold text-slate-800">' + escapeHtml(mainName) + ' <span class="text-slate-400 font-bold">(' + items.length + ')</span></span>' +
+            '<i class="fa-solid ' + (isClosed ? 'fa-chevron-down' : 'fa-chevron-up') + ' text-[10px] text-slate-400"></i>' +
+          '</button>' +
+          (isClosed ? '' :
+            '<div class="divide-y divide-slate-100 px-3.5">' +
+              items.map(function(k) {
+                return '<div class="py-2 flex items-center justify-between gap-2">' +
+                  '<div class="min-w-0">' +
+                    '<p class="text-xs font-semibold text-slate-800 truncate">' + escapeHtml(k.Sub_Kategori) + '</p>' +
+                    (k.Jenis === "Pengeluaran" ? '<span class="inline-block mt-0.5 text-[9px] font-extrabold px-1.5 py-0.5 rounded-md border ' + getPosBadgeClass(k.Pos_Budget) + '">' + escapeHtml(k.Pos_Budget) + '</span>' : '') +
+                  '</div>' +
+                  '<button onclick="confirmDeleteKat(\'' + k.ID_Kategori + '\')" class="w-7 h-7 rounded-lg bg-rose-50 text-rose-500 flex items-center justify-center shrink-0"><i class="fa-solid fa-trash text-[10px]"></i></button>' +
+                '</div>';
+              }).join("") +
+            '</div>'
+          ) +
+        '</div>';
+      }).join("");
+
+      container.innerHTML =
+        subPageHeader("Master Kategori", "Kategori", "openKategoriSheet()") +
+        '<div class="space-y-3">' +
+          '<div class="grid grid-cols-2 gap-1.5 bg-slate-200/70 p-1 rounded-xl">' +
+            '<button onclick="state.katTab=\'Pengeluaran\';renderCurrentPage()" class="py-2 rounded-lg text-xs font-extrabold transition ' + (state.katTab === "Pengeluaran" ? 'bg-white text-rose-600 shadow-xs' : 'text-slate-600') + '">Pengeluaran (' + exCount + ')</button>' +
+            '<button onclick="state.katTab=\'Pemasukan\';renderCurrentPage()" class="py-2 rounded-lg text-xs font-extrabold transition ' + (state.katTab === "Pemasukan" ? 'bg-white text-teal-700 shadow-xs' : 'text-slate-600') + '">Pemasukan (' + inCount + ')</button>' +
+          '</div>' +
+          '<input type="text" value="' + escapeHtml(state.katSearch) + '" oninput="state.katSearch=this.value;renderCurrentPage()" placeholder="Cari kategori atau sub kategori..." class="w-full min-h-[40px] px-3.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500" />' +
+          '<div class="space-y-2.5">' + (groupsHtml || '<p class="text-xs text-slate-400 text-center py-6">Kategori tidak ditemukan</p>') + '</div>' +
+        '</div>';
+    }
+
+    function toggleKatGroup(name) {
+      state.katCollapsed[name] = !state.katCollapsed[name];
+      renderCurrentPage();
+    }
+
+    function openKategoriSheet() {
+      const mainSuggestions = Array.from(new Set(state.data.kategori.map(function(k) { return k.Kategori_Utama; })));
+      openSheet("Tambah Sub Kategori",
+        '<form onsubmit="submitKategori(event)" class="space-y-3">' +
+          '<div><label class="block text-[11px] font-bold text-slate-600 mb-1">Jenis</label><select id="kat-jenis" onchange="document.getElementById(\'kat-pos-row\').classList.toggle(\'hidden\', this.value!==\'Pengeluaran\')" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-bold bg-white"><option value="Pengeluaran">Pengeluaran</option><option value="Pemasukan">Pemasukan</option></select></div>' +
+          '<div><label class="block text-[11px] font-bold text-slate-600 mb-1">Kategori Utama</label><input type="text" id="kat-main" list="main-cat-suggestions" required placeholder="Contoh: Kebutuhan Rumah Tangga" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-bold" /><datalist id="main-cat-suggestions">' +
+            mainSuggestions.map(function(m) { return '<option value="' + escapeHtml(m) + '"></option>'; }).join("") +
+          '</datalist></div>' +
+          '<div><label class="block text-[11px] font-bold text-slate-600 mb-1">Sub Kategori</label><input type="text" id="kat-sub" required placeholder="Contoh: Service AC" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-bold" /></div>' +
+          '<div id="kat-pos-row"><label class="block text-[11px] font-bold text-slate-600 mb-1">Pos Budgeting 50/30/20</label><select id="kat-pos" class="w-full min-h-[42px] px-3 rounded-xl border border-slate-200 text-xs font-bold bg-white"><option value="Kebutuhan">Kebutuhan (50%)</option><option value="Keinginan">Keinginan (30%)</option><option value="Investasi">Investasi (20%)</option></select></div>' +
+          '<button type="submit" class="w-full min-h-[46px] rounded-xl bg-teal-700 text-white text-sm font-extrabold">Simpan Kategori</button>' +
+        '</form>'
+      );
+    }
+
+    async function submitKategori(e) {
+      e.preventDefault();
+      const jenis = document.getElementById("kat-jenis").value;
+      const res = await apiCall("saveCategory", {
+        Jenis: jenis,
+        Kategori_Utama: document.getElementById("kat-main").value.trim(),
+        Sub_Kategori: document.getElementById("kat-sub").value.trim(),
+        Pos_Budget: jenis === "Pengeluaran" ? document.getElementById("kat-pos").value : "-"
+      });
+      if (res.success) {
+        closeSheet();
+        showToast("Kategori ditambahkan", "success");
+        if (!IS_PREVIEW) await refreshAllData(true);
+        else renderCurrentPage();
+      }
+    }
+
+    function confirmDeleteKat(id) {
+      showConfirm("Hapus Kategori", "Yakin ingin menghapus sub kategori ini?", async function() {
+        const res = await apiCall("deleteCategory", { ID_Kategori: id });
+        if (res.success) {
+          showToast("Kategori dihapus", "info");
+          if (!IS_PREVIEW) await refreshAllData(true);
+          else renderCurrentPage();
+        }
+      });
+    }
+
+    // =========================================================================
+    // 11. INISIALISASI APLIKASI
+    // =========================================================================
+    async function refreshAllData(silent) {
+      const res = await apiCall("getAllData");
+      if (res.success && res.data) {
+        const mergedKat = ensureDefaultCategories(res.data.kategori);
+        state.data = {
+          dompet: res.data.dompet || [],
+          kategori: mergedKat.list,
+          transaksi: res.data.transaksi || [],
+          targetBulanan: res.data.targetBulanan || [],
+          targetTabungan: res.data.targetTabungan || [],
+          tagihan: res.data.tagihan || []
+        };
+        renderTopBar();
+        renderBottomNav();
+        renderCurrentPage();
+        if (!silent) showToast("Data berhasil disegarkan", "info");
+      }
+    }
+
+    window.addEventListener("DOMContentLoaded", function() {
+      renderTopBar();
+      renderBottomNav();
+      refreshAllData(true);
+    });
+  </script>
+</body>
+</html>
