@@ -164,14 +164,17 @@
             </div>
             <div class="min-w-0">
               <h1 class="text-[15px] font-extrabold text-slate-900 leading-tight truncate">Abu Syauqi Budgeting</h1>
-              <div id="mode-indicator" class="flex items-center gap-1.5 text-[10px] font-bold">
+              <div id="mode-indicator" class="flex items-center gap-1.5 text-[10px] font-bold"></div>
+            </div>
+          </div>
+
           <!-- Tombol Install PWA & Refresh -->
           <div class="flex items-center gap-1.5 shrink-0">
             <button id="btn-install-top" onclick="triggerPwaInstall()" class="hidden h-10 px-2.5 rounded-xl bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-800 text-[11px] font-extrabold items-center gap-1.5 active:scale-95 transition" aria-label="Install Aplikasi">
               <i class="fa-solid fa-download text-xs"></i><span>Install</span>
             </button>
-            <button onclick="refreshAllData()" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-600 flex items-center justify-center transition shrink-0" aria-label="Segarkan Data">
-              <i class="fa-solid fa-rotate text-sm"></i>
+            <button onclick="refreshAllData(false)" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-600 flex items-center justify-center transition shrink-0" aria-label="Segarkan Data">
+              <i id="btn-refresh-icon" class="fa-solid fa-rotate text-sm"></i>
             </button>
           </div>
         </div>
@@ -264,12 +267,15 @@
 
       <!-- ==================== LOADING OVERLAY ==================== -->
       <div id="global-loader" class="hidden absolute inset-0 bg-slate-900/30 backdrop-blur-[1px] z-[60] flex items-center justify-center p-6">
-        <div class="bg-white rounded-2xl px-5 py-4 shadow-xl flex items-center gap-3.5 border border-slate-100">
-          <div class="w-6 h-6 border-[3px] border-teal-700 border-t-transparent rounded-full animate-spin shrink-0"></div>
-          <div>
-            <p class="text-xs font-extrabold text-slate-800">Menyinkronkan...</p>
-            <p class="text-[11px] text-slate-500">Menghubungi Google Sheets</p>
+        <div class="bg-white rounded-2xl px-5 py-4 shadow-xl flex flex-col gap-3 border border-slate-100 max-w-[280px] w-full">
+          <div class="flex items-center gap-3.5">
+            <div class="w-6 h-6 border-[3px] border-teal-700 border-t-transparent rounded-full animate-spin shrink-0"></div>
+            <div>
+              <p class="text-xs font-extrabold text-slate-800">Menyinkronkan...</p>
+              <p class="text-[11px] text-slate-500">Menghubungi Google Sheets</p>
+            </div>
           </div>
+          <button onclick="cancelActiveRequest()" class="w-full py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-bold text-slate-600 transition">Batalkan</button>
         </div>
       </div>
 
@@ -284,14 +290,16 @@
   <!-- ===================================================================== -->
   <script>
     // KONFIGURASI APLIKASI
-    // UBAH IS_PREVIEW KE false JIKA AKAN DI-DEPLOY KE BLOGGER
-    const IS_PREVIEW = false; // Set default true untuk Canvas
-    const GAS_URL = "https://script.google.com/macros/s/AKfycbxRkLzq1HZOlBwmRgzXvMh77BB1FeOREVL1YRvVb1vg-Sepdkqp83otI2tuIptry8Ca/exec";
+    // UBAH IS_PREVIEW KE false JIKA AKAN DI-DEPLOY KE VERCEL / BLOGGER
+    const IS_PREVIEW = true; // Set default true untuk Canvas
+    const GAS_URL = "URL_DEPLOY_GAS_ANDA_DISINI";
 
     // =========================================================================
     // 1. KONSTANTA, STATE & CHART REGISTRY
     // =========================================================================
     const STORAGE_KEY = "abu_syauqi_mobile_budget_v3";
+    const LIVE_CACHE_KEY = "abu_syauqi_live_cache_v1";
+    let activeAbortController = null;
     const BULAN_LIST = [
       "Januari", "Februari", "Maret", "April", "Mei", "Juni",
       "Juli", "Agustus", "September", "Oktober", "November", "Desember"
@@ -423,6 +431,21 @@
       const el = document.getElementById("global-loader");
       if (!el) return;
       el.classList.toggle("hidden", !show);
+    }
+
+    function setRefreshSpin(spinning) {
+      const icon = document.getElementById("btn-refresh-icon");
+      if (icon) icon.classList.toggle("animate-spin", !!spinning);
+    }
+
+    function cancelActiveRequest() {
+      if (activeAbortController) {
+        try { activeAbortController.abort(); } catch (e) {}
+        activeAbortController = null;
+      }
+      showLoader(false);
+      setRefreshSpin(false);
+      showToast("Sinkronisasi dibatalkan", "info");
     }
 
     function showToast(message, type) {
@@ -760,48 +783,114 @@
       } catch (e) {}
     }
 
+    function saveLiveCache(data) {
+      try {
+        localStorage.setItem(LIVE_CACHE_KEY, JSON.stringify(data));
+      } catch (e) {}
+    }
+
+    function loadLiveCache() {
+      try {
+        const raw = localStorage.getItem(LIVE_CACHE_KEY);
+        return raw ? JSON.parse(raw) : null;
+      } catch (e) {
+        return null;
+      }
+    }
+
     function loadPreviewDB() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
         if (raw) {
           const parsed = JSON.parse(raw);
-          if (parsed && Array.isArray(parsed.kategori)) {
+          if (parsed && Array.isArray(parsed.dompet) && Array.isArray(parsed.kategori)) {
             const merged = ensureDefaultCategories(parsed.kategori);
             parsed.kategori = merged.list;
             if (merged.changed) {
-              try { localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed)); } catch (e) {}
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
             }
             return parsed;
           }
         }
       } catch (e) {}
-      const fresh = buildDummyData();
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh)); } catch (e) {}
-      return fresh;
+      const dummy = buildDummyData();
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(dummy));
+      } catch (e) {}
+      return dummy;
     }
 
-    async function apiCall(action, payload) {
+    async function apiCall(action, payload, options) {
       const body = payload || {};
+      const opts = options || {};
       if (IS_PREVIEW) {
         return handlePreviewApi(action, body);
       }
 
-      showLoader(true);
+      if (!GAS_URL || GAS_URL.indexOf("https://script.google.com/") !== 0) {
+        showToast("URL GAS belum valid. Pastikan GAS_URL diisi URL Web App (/exec).", "error");
+        return { success: false, message: "GAS_URL tidak valid" };
+      }
+
+      const isBackground = Boolean(opts.background);
+      if (isBackground) setRefreshSpin(true);
+      else showLoader(true);
+
+      const controller = new AbortController();
+      activeAbortController = controller;
+      const timeoutId = setTimeout(function() {
+        controller.abort();
+      }, 20000); // Batas waktu maksimal 20 detik agar tidak loading selamanya
+
       try {
-        const res = await fetch(GAS_URL, {
-          method: "POST",
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: action, payload: body })
-        });
-        const json = await res.json();
+        let res;
+        if (action === "getAllData") {
+          // Gunakan GET agar lebih cepat dan stabil di jaringan HP / PWA
+          const sep = GAS_URL.indexOf("?") >= 0 ? "&" : "?";
+          res = await fetch(GAS_URL + sep + "action=getAllData&_t=" + Date.now(), {
+            method: "GET",
+            redirect: "follow",
+            signal: controller.signal
+          });
+        } else {
+          res = await fetch(GAS_URL, {
+            method: "POST",
+            redirect: "follow",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({ action: action, payload: body }),
+            signal: controller.signal
+          });
+        }
+
+        clearTimeout(timeoutId);
+        activeAbortController = null;
+        const rawText = await res.text();
+
+        // Deteksi jika Google mengembalikan halaman HTML (biasanya karena akses bukan "Anyone" atau URL salah)
+        if (rawText.trim().startsWith("<")) {
+          showLoader(false);
+          setRefreshSpin(false);
+          showToast("Akses Google Sheets ditolak. Pastikan Deploy GAS disetel 'Siapa saja (Anyone)' & URL berakhiran /exec.", "error");
+          return { success: false, message: "Response HTML dari GAS" };
+        }
+
+        const json = JSON.parse(rawText);
         showLoader(false);
+        setRefreshSpin(false);
         if (!json.success) {
           showToast(json.message || "Terjadi kesalahan di server", "error");
         }
         return json;
       } catch (err) {
+        clearTimeout(timeoutId);
+        activeAbortController = null;
         showLoader(false);
-        showToast("Gagal terhubung ke Google Sheets: " + err.message, "error");
+        setRefreshSpin(false);
+        if (err && err.name === "AbortError") {
+          showToast("Koneksi ke Google Sheets terlalu lama (timeout). Cek internet atau coba klik Refresh.", "warning");
+        } else {
+          showToast("Gagal terhubung ke Google Sheets: " + err.message, "error");
+        }
         return { success: false, message: err.message };
       }
     }
@@ -2572,8 +2661,6 @@
     }
 
     // =========================================================================
-    // 11. INISIALISASI APLIKASI
-    // =========================================================================
     // 11. FITUR PWA AUTO-INSTALL KE HP (MANIFEST, SERVICE WORKER & PROMPT)
     // =========================================================================
     let deferredInstallPrompt = null;
@@ -2763,21 +2850,26 @@
     // =========================================================================
     // 12. INISIALISASI APLIKASI
     // =========================================================================
-    async function refreshAllData(silent) {
-      const res = await apiCall("getAllData");
+    function applyDataToState(rawData) {
+      const mergedKat = ensureDefaultCategories(rawData.kategori);
+      state.data = {
+        dompet: rawData.dompet || [],
+        kategori: mergedKat.list,
+        transaksi: rawData.transaksi || [],
+        targetBulanan: rawData.targetBulanan || [],
+        targetTabungan: rawData.targetTabungan || [],
+        tagihan: rawData.tagihan || []
+      };
+      renderTopBar();
+      renderBottomNav();
+      renderCurrentPage();
+    }
+
+    async function refreshAllData(silent, isBackground) {
+      const res = await apiCall("getAllData", {}, { background: Boolean(isBackground) });
       if (res.success && res.data) {
-        const mergedKat = ensureDefaultCategories(res.data.kategori);
-        state.data = {
-          dompet: res.data.dompet || [],
-          kategori: mergedKat.list,
-          transaksi: res.data.transaksi || [],
-          targetBulanan: res.data.targetBulanan || [],
-          targetTabungan: res.data.targetTabungan || [],
-          tagihan: res.data.tagihan || []
-        };
-        renderTopBar();
-        renderBottomNav();
-        renderCurrentPage();
+        if (!IS_PREVIEW) saveLiveCache(res.data);
+        applyDataToState(res.data);
         if (!silent) showToast("Data berhasil disegarkan", "info");
       }
     }
@@ -2786,7 +2878,17 @@
       initPwaInstaller();
       renderTopBar();
       renderBottomNav();
-      refreshAllData(true);
+
+      // Jika mode Live dan sudah ada cache lokal, tampilkan langsung lalu sinkron di belakang layar
+      if (!IS_PREVIEW) {
+        const cached = loadLiveCache();
+        if (cached) {
+          applyDataToState(cached);
+          refreshAllData(true, true);
+          return;
+        }
+      }
+      refreshAllData(true, false);
     });
   </script>
 </body>
