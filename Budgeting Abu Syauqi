@@ -5,6 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Abu Syauqi Budgeting - Aplikasi Keuangan Keluarga</title>
 
+  <!-- PWA & Mobile App Install Meta Tags -->
+  <meta name="theme-color" content="#0f766e" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Abu Syauqi" />
+  <link rel="apple-touch-icon" href="https://placehold.co/192x192/0f766e/ffffff.png?text=AS" />
+  <link id="pwa-manifest-link" rel="manifest" href="" />
+
   <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -156,15 +165,15 @@
             <div class="min-w-0">
               <h1 class="text-[15px] font-extrabold text-slate-900 leading-tight truncate">Abu Syauqi Budgeting</h1>
               <div id="mode-indicator" class="flex items-center gap-1.5 text-[10px] font-bold">
-                <!-- Status mode diisi JS -->
-              </div>
-            </div>
+          <!-- Tombol Install PWA & Refresh -->
+          <div class="flex items-center gap-1.5 shrink-0">
+            <button id="btn-install-top" onclick="triggerPwaInstall()" class="hidden h-10 px-2.5 rounded-xl bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-800 text-[11px] font-extrabold items-center gap-1.5 active:scale-95 transition" aria-label="Install Aplikasi">
+              <i class="fa-solid fa-download text-xs"></i><span>Install</span>
+            </button>
+            <button onclick="refreshAllData()" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-600 flex items-center justify-center transition shrink-0" aria-label="Segarkan Data">
+              <i class="fa-solid fa-rotate text-sm"></i>
+            </button>
           </div>
-
-          <!-- Tombol Refresh -->
-          <button onclick="refreshAllData()" class="w-10 h-10 rounded-xl bg-slate-100 hover:bg-slate-200 active:scale-95 text-slate-600 flex items-center justify-center transition shrink-0" aria-label="Segarkan Data">
-            <i class="fa-solid fa-rotate text-sm"></i>
-          </button>
         </div>
 
         <!-- Quick Period Picker (Bulan & Tahun) -->
@@ -185,6 +194,25 @@
           </div>
         </div>
       </header>
+
+      <!-- ==================== BANNER INSTALL APLIKASI OTOMATIS (PWA) ==================== -->
+      <div id="pwa-install-banner" class="hidden bg-gradient-to-r from-teal-700 to-emerald-600 text-white px-3.5 py-2.5 shrink-0 flex items-center justify-between gap-2.5 shadow-sm z-20 animate-fade no-print">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-8 h-8 rounded-lg bg-white/15 flex items-center justify-center shrink-0">
+            <i class="fa-solid fa-mobile-screen-button text-sm"></i>
+          </div>
+          <div class="min-w-0">
+            <p class="text-[11px] font-extrabold leading-tight truncate">Install Abu Syauqi Budgeting</p>
+            <p id="pwa-banner-sub" class="text-[10px] text-teal-100 truncate">Pasang di layar utama HP agar lebih cepat</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button onclick="triggerPwaInstall()" class="px-3 py-1.5 rounded-lg bg-white text-teal-800 text-[11px] font-extrabold shadow-xs active:scale-95 transition">Pasang</button>
+          <button onclick="dismissPwaBanner()" class="w-7 h-7 rounded-lg bg-white/15 hover:bg-white/25 text-white flex items-center justify-center transition" aria-label="Tutup Banner Install">
+            <i class="fa-solid fa-xmark text-xs"></i>
+          </button>
+        </div>
+      </div>
 
       <!-- ==================== AREA KONTEN SCROLLABLE ==================== -->
       <main id="app-main-scroll" class="flex-1 overflow-y-auto app-scroll px-3.5 pt-3.5 pb-24">
@@ -2084,6 +2112,14 @@
                 '<i class="fa-solid fa-chevron-right text-slate-300 text-xs"></i>' +
               '</button>';
             }).join("") +
+            '<button onclick="triggerPwaInstall()" class="w-full bg-gradient-to-r from-teal-700 to-emerald-600 text-white rounded-2xl p-3.5 shadow-sm flex items-center gap-3.5 active:scale-[0.98] transition text-left">' +
+              '<div class="w-11 h-11 rounded-xl bg-white/15 text-white flex items-center justify-center text-lg shrink-0"><i class="fa-solid fa-mobile-screen-button"></i></div>' +
+              '<div class="flex-1 min-w-0">' +
+                '<p class="text-sm font-extrabold">Install Aplikasi ke HP</p>' +
+                '<p class="text-[11px] font-medium text-teal-100">Tambahkan ikon ke Layar Utama (PWA)</p>' +
+              '</div>' +
+              '<i class="fa-solid fa-download text-teal-100 text-sm"></i>' +
+            '</button>' +
           '</div>' +
         '</div>';
     }
@@ -2538,6 +2574,193 @@
     // =========================================================================
     // 11. INISIALISASI APLIKASI
     // =========================================================================
+    // 11. FITUR PWA AUTO-INSTALL KE HP (MANIFEST, SERVICE WORKER & PROMPT)
+    // =========================================================================
+    let deferredInstallPrompt = null;
+    const PWA_DISMISS_KEY = "abu_syauqi_pwa_dismissed";
+
+    function isRunningStandalone() {
+      return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) ||
+        window.navigator.standalone === true;
+    }
+
+    function isIosDevice() {
+      return /iphone|ipad|ipod/i.test(window.navigator.userAgent || "");
+    }
+
+    function initPwaManifest() {
+      try {
+        const startUrl = window.location.origin + window.location.pathname;
+        const manifest = {
+          name: "Abu Syauqi Budgeting",
+          short_name: "Abu Syauqi",
+          description: "Aplikasi pencatatan keuangan & budgeting 50/30/20 keluarga modern",
+          start_url: startUrl,
+          scope: window.location.origin + "/",
+          display: "standalone",
+          orientation: "portrait",
+          background_color: "#f8fafc",
+          theme_color: "#0f766e",
+          icons: [
+            {
+              src: "https://placehold.co/192x192/0f766e/ffffff.png?text=AS",
+              sizes: "192x192",
+              type: "image/png",
+              purpose: "any maskable"
+            },
+            {
+              src: "https://placehold.co/512x512/0f766e/ffffff.png?text=AS",
+              sizes: "512x512",
+              type: "image/png",
+              purpose: "any maskable"
+            }
+          ]
+        };
+        const blob = new Blob([JSON.stringify(manifest)], { type: "application/manifest+json" });
+        const manifestUrl = URL.createObjectURL(blob);
+        const linkEl = document.getElementById("pwa-manifest-link");
+        if (linkEl) linkEl.setAttribute("href", manifestUrl);
+      } catch (e) {}
+    }
+
+    function registerPwaServiceWorker() {
+      try {
+        if ("serviceWorker" in navigator && (window.location.protocol === "https:" || window.location.hostname === "localhost")) {
+          navigator.serviceWorker.register("./sw.js").catch(function() {});
+        }
+      } catch (e) {}
+    }
+
+    function showPwaInstallUI(showBanner) {
+      if (isRunningStandalone()) return;
+      const topBtn = document.getElementById("btn-install-top");
+      const banner = document.getElementById("pwa-install-banner");
+      if (topBtn) {
+        topBtn.classList.remove("hidden");
+        topBtn.classList.add("flex");
+      }
+      if (banner && showBanner && !sessionStorage.getItem(PWA_DISMISS_KEY)) {
+        banner.classList.remove("hidden");
+      }
+    }
+
+    function hidePwaInstallUI() {
+      const topBtn = document.getElementById("btn-install-top");
+      const banner = document.getElementById("pwa-install-banner");
+      if (topBtn) {
+        topBtn.classList.add("hidden");
+        topBtn.classList.remove("flex");
+      }
+      if (banner) banner.classList.add("hidden");
+    }
+
+    function dismissPwaBanner() {
+      const banner = document.getElementById("pwa-install-banner");
+      if (banner) banner.classList.add("hidden");
+      try { sessionStorage.setItem(PWA_DISMISS_KEY, "1"); } catch (e) {}
+    }
+
+    async function triggerPwaInstall() {
+      if (isRunningStandalone()) {
+        showToast("Aplikasi sudah terpasang di HP Anda", "info");
+        return;
+      }
+
+      // 1. Jika browser mendukung popup install otomatis (Android Chrome/Edge/Samsung)
+      if (deferredInstallPrompt) {
+        try {
+          deferredInstallPrompt.prompt();
+          const choice = await deferredInstallPrompt.userChoice;
+          if (choice && choice.outcome === "accepted") {
+            showToast("Memasang aplikasi ke HP...", "success");
+            hidePwaInstallUI();
+          }
+          deferredInstallPrompt = null;
+          return;
+        } catch (err) {}
+      }
+
+      // 2. Panduan cepat untuk pengguna iPhone / iPad (Safari)
+      if (isIosDevice()) {
+        openSheet("Pasang di Layar Utama iPhone",
+          '<div class="space-y-3.5 text-xs text-slate-700">' +
+            '<p class="leading-relaxed">Safari iPhone memerlukan 3 ketukan singkat untuk memasang aplikasi ke layar utama:</p>' +
+            '<div class="space-y-2.5">' +
+              '<div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200">' +
+                '<span class="w-7 h-7 rounded-lg bg-teal-700 text-white font-extrabold flex items-center justify-center shrink-0">1</span>' +
+                '<p>Ketuk ikon <b>Share</b> (<i class="fa-solid fa-arrow-up-from-bracket text-teal-700"></i>) di bagian bawah Safari.</p>' +
+              '</div>' +
+              '<div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200">' +
+                '<span class="w-7 h-7 rounded-lg bg-teal-700 text-white font-extrabold flex items-center justify-center shrink-0">2</span>' +
+                '<p>Gulir ke bawah lalu pilih <b>Add to Home Screen</b> (Tambahkan ke Layar Utama).</p>' +
+              '</div>' +
+              '<div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200">' +
+                '<span class="w-7 h-7 rounded-lg bg-teal-700 text-white font-extrabold flex items-center justify-center shrink-0">3</span>' +
+                '<p>Ketuk <b>Add / Tambah</b> di pojok kanan atas.</p>' +
+              '</div>' +
+            '</div>' +
+            '<button onclick="closeSheet()" class="w-full min-h-[44px] rounded-xl bg-teal-700 text-white font-extrabold">Mengerti</button>' +
+          '</div>'
+        );
+        return;
+      }
+
+      // 3. Panduan fallback jika dibuka di Preview atau browser belum memicu prompt otomatis
+      openSheet("Cara Install ke HP (Android)",
+        '<div class="space-y-3.5 text-xs text-slate-700">' +
+          '<p class="leading-relaxed">Popup install otomatis aktif saat aplikasi dibuka lewat URL <b>HTTPS Vercel</b> di Chrome HP. Anda juga bisa memasangnya manual dengan cara:</p>' +
+          '<div class="space-y-2.5">' +
+            '<div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200">' +
+              '<span class="w-7 h-7 rounded-lg bg-teal-700 text-white font-extrabold flex items-center justify-center shrink-0">1</span>' +
+              '<p>Buka link aplikasi Vercel Anda menggunakan browser <b>Google Chrome</b>.</p>' +
+            '</div>' +
+            '<div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200">' +
+              '<span class="w-7 h-7 rounded-lg bg-teal-700 text-white font-extrabold flex items-center justify-center shrink-0">2</span>' +
+              '<p>Ketuk ikon titik tiga (<b>⋮</b>) di pojok kanan atas browser.</p>' +
+            '</div>' +
+            '<div class="flex items-center gap-3 p-3 rounded-xl bg-slate-50 border border-slate-200">' +
+              '<span class="w-7 h-7 rounded-lg bg-teal-700 text-white font-extrabold flex items-center justify-center shrink-0">3</span>' +
+              '<p>Pilih <b>Install app</b> atau <b>Tambahkan ke layar utama</b>.</p>' +
+            '</div>' +
+          '</div>' +
+          '<button onclick="closeSheet()" class="w-full min-h-[44px] rounded-xl bg-teal-700 text-white font-extrabold">Tutup</button>' +
+        '</div>'
+      );
+    }
+
+    function initPwaInstaller() {
+      initPwaManifest();
+      registerPwaServiceWorker();
+
+      if (isRunningStandalone()) {
+        hidePwaInstallUI();
+        return;
+      }
+
+      // Tangkap event native install otomatis di Android Chrome / Edge
+      window.addEventListener("beforeinstallprompt", function(e) {
+        e.preventDefault();
+        deferredInstallPrompt = e;
+        showPwaInstallUI(true);
+      });
+
+      window.addEventListener("appinstalled", function() {
+        deferredInstallPrompt = null;
+        hidePwaInstallUI();
+        showToast("Aplikasi berhasil dipasang di HP Anda!", "success");
+      });
+
+      // Tampilkan tombol Install di header & banner lembut untuk iPhone/mobile
+      setTimeout(function() {
+        if (!isRunningStandalone()) {
+          showPwaInstallUI(isIosDevice() || Boolean(deferredInstallPrompt));
+        }
+      }, 1500);
+    }
+
+    // =========================================================================
+    // 12. INISIALISASI APLIKASI
+    // =========================================================================
     async function refreshAllData(silent) {
       const res = await apiCall("getAllData");
       if (res.success && res.data) {
@@ -2558,6 +2781,7 @@
     }
 
     window.addEventListener("DOMContentLoaded", function() {
+      initPwaInstaller();
       renderTopBar();
       renderBottomNav();
       refreshAllData(true);
