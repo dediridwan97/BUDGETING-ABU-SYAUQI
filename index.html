@@ -299,9 +299,9 @@
     // =========================================================================
     // 1. SAKLAR MODE PREVIEW VS PRODUKSI SUPABASE (WAJIB)
     // =========================================================================
-    const IS_PREVIEW = true; // Ubah menjadi false saat deploy ke Vercel agar 100% terhubung ke Supabase
-    const SUPABASE_URL = "https://YOUR_PROJECT_ID.supabase.co";
-    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+    const IS_PREVIEW = false; // Ubah menjadi false saat deploy ke Vercel agar 100% terhubung ke Supabase
+    const SUPABASE_URL = "https://dgvzlyldwbfhqrtazuyz.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_qPinniRZpOp4oJEZLb1T3g_vE7fkjMa";
 
     // Inisialisasi klien Supabase hanya saat mode produksi & kredensial valid
     let supabase = null;
