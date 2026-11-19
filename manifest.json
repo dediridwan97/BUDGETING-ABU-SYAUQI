@@ -1,27 +1,27 @@
 {
-"name": "Abu Syauqi Budgeting",
-"short_name": "Abu Syauqi",
-"description": "Aplikasi pencatatan keuangan & budgeting 50/30/20 keluarga modern",
-"start_url": "/",
-"scope": "/",
-"display": "standalone",
-"orientation": "portrait",
-"background_color": "#f8fafc",
-"theme_color": "#0f766e",
-"lang": "id-ID",
-"categories": ["finance", "productivity", "lifestyle"],
-"icons": [
-{
-"src": "https://placehold.co/192x192/0f766e/ffffff.png?text=AS",
-"sizes": "192x192",
-"type": "image/png",
-"purpose": "any maskable"
-},
-{
-"src": "https://placehold.co/512x512/0f766e/ffffff.png?text=AS",
-"sizes": "512x512",
-"type": "image/png",
-"purpose": "any maskable"
-}
-]
+  "name": "Abu Syauqi Budgeting",
+  "short_name": "Abu Syauqi",
+  "description": "Aplikasi pencatatan keuangan & budgeting 50/30/20 keluarga modern",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f8fafc",
+  "theme_color": "#0f766e",
+  "lang": "id-ID",
+  "categories": ["finance", "productivity", "lifestyle"],
+  "icons": [
+    {
+      "src": "https://placehold.co/192x192/0f766e/ffffff.png?text=AS",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://placehold.co/512x512/0f766e/ffffff.png?text=AS",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
