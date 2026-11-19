@@ -1,8 +1,9 @@
-const CACHE_NAME = "abu-syauqi-shell-v1";
+const CACHE_NAME = "abu-syauqi-pwa-v3";
 const APP_SHELL = [
   "/",
   "/index.html",
-  "/manifest.json"
+  "/manifest.json",
+  "/icon.jpg"
 ];
 
 // 1. Install: simpan App Shell inti agar langsung siap
