@@ -12,7 +12,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Abu Syauqi" />
   <link rel="apple-touch-icon" href="https://placehold.co/192x192/0f766e/ffffff.png?text=AS" />
-  <link id="pwa-manifest-link" rel="manifest" href="" />
+  <link id="pwa-manifest-link" rel="manifest" href="./manifest.json" />
 
   <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -2589,6 +2589,8 @@
     }
 
     function initPwaManifest() {
+      // Saat di-deploy (IS_PREVIEW = false), gunakan file statis ./manifest.json agar auto-install Android 100% stabil
+      if (!IS_PREVIEW) return;
       try {
         const startUrl = window.location.origin + window.location.pathname;
         const manifest = {
